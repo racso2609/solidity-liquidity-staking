@@ -19,3 +19,7 @@ exports.currentTime = async () => {
 	return timestamp;
 };
 exports.toDays = (amt) => 60 * 60 * 24 * amt;
+
+exports.getReceipt = async (txHash) => {
+	return await ethers.provider.getTransactionReceipt(txHash);
+};
