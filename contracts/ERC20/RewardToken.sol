@@ -1,10 +1,10 @@
 //  SPDX-License-Identifier:  MIT
-pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+pragma solidity ^0.6.6;
+import "@openzeppelin/contracts/presets/ERC20PresetMinterPauser.sol";
 
 contract RewardToken is ERC20PresetMinterPauser{
 
-  constructor() ERC20PresetMinterPauser("RewardToken","RT") { 
+  constructor() public ERC20PresetMinterPauser("RewardToken","RT") { 
   }
 
 }

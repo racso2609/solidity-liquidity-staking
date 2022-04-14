@@ -1,16 +1,16 @@
 //  SPDX-License-Identifier:  UNLICENSE
 pragma solidity ^0.6.6;
-import "./Token.sol";
+import "./RewardToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TokenSale is Ownable {
 	using SafeMath for uint256;
-	Token public tokenContract;
+	RewardToken public tokenContract;
 	uint256 public tokenPrice;
 	uint256 public tokensSold;
 
-	constructor(Token _tokenContract, uint256 _tokenPrice) public {
+	constructor(RewardToken _tokenContract, uint256 _tokenPrice) public {
 		tokenContract = _tokenContract;
 		tokenPrice = _tokenPrice;
 	}
