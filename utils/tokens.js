@@ -98,6 +98,13 @@ const tokens = {
 			address: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
 		},
 	],
+	[4]: [
+		{
+			decimals: 18,
+			symbol: "DAI",
+			address: "0x95b58a6Bff3D14B7DB2f5cb5F0Ad413DC2940658",
+		},
+	],
 };
 
 const contracts = {
@@ -107,6 +114,32 @@ const contracts = {
 			name: "UNISWAP",
 		},
 	],
+	[4]: [
+		{
+			address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+			name: "UNISWAP",
+		},
+	],
+};
+
+const impersonate = {
+	[4]: [
+		{
+			symbol: "DAI",
+			address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+		},
+	],
+};
+const getImpersonate = (symbol) => {
+	const impersonateAddress = impersonate[networkId]?.find(
+		(t) => t.symbol === symbol
+	);
+
+	if (!impersonateAddress)
+		throw new Error(
+			`Impersonate ${symbol} not available on network ${networkId}`
+		);
+	return impersonateAddress;
 };
 
 const getContract = (name) => {
@@ -121,6 +154,8 @@ module.exports = {
 	allowance,
 	balanceOf,
 	impersonateTokens,
+	getImpersonate,
+	impersonate,
 	tokens,
 	getToken,
 	contracts,
