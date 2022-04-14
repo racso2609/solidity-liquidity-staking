@@ -3,11 +3,13 @@
  */
 
 require("dotenv").config();
-// cSpell: disable nexr two lines
+
+// cSpell: disable next line
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-deploy");
+// cSpell: disable next line
 require("solidity-coverage");
 require("hardhat-gas-reporter");
 require("hardhat-deploy-ethers");
@@ -21,10 +23,10 @@ module.exports = {
 	networks: {
 		hardhat: {
 			// Uncomment these lines to use mainnet fork
-			// forking: {
-			//   url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-			//   blockNumber: 11589707,
-			// },
+			forking: {
+				url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+				blockNumber: 14585261,
+			},
 		},
 		rinkeby: {
 			url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
@@ -56,13 +58,17 @@ module.exports = {
 		excludeContracts: ["mocks/"],
 	},
 	solidity: {
-		version: "0.8.7",
-		settings: {
-			optimizer: {
-				enabled: true,
-				runs: 200,
+		compilers: [
+			{
+				version: "0.6.6",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 200,
+					},
+				},
 			},
-		},
+		],
 	},
 	mocha: {
 		timeout: 240000,
