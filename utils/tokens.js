@@ -11,6 +11,7 @@ async function allowance({ tokenAddress, to, from, amount }) {
 
 	await txApprove.wait();
 }
+
 async function transfer({ tokenAddress, to, from, amount }) {
 	const signer = await ethers.provider.getSigner(from);
 
@@ -80,6 +81,11 @@ const tokens = {
 			symbol: "ALBT",
 			address: "0x00a8b738E453fFd858a7edf03bcCfe20412f0Eb0",
 		},
+		{
+			decimals: 18,
+			symbol: "WETH",
+			address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+		},
 	],
 	[137]: [
 		{
@@ -123,6 +129,12 @@ const contracts = {
 };
 
 const impersonate = {
+	[1]: [
+		{
+			symbol: "DAI",
+			address: "0x5d38b4e4783e34e2301a2a36c39a03c45798c4dd",
+		},
+	],
 	[4]: [
 		{
 			symbol: "DAI",
