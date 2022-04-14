@@ -101,20 +101,21 @@ const tokens = {
 };
 
 const contracts = {
-  1:{
-    address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D" 
-    name: "UNISWAP"
-  }
-}
+	[1]: [
+		{
+			address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+			name: "UNISWAP",
+		},
+	],
+};
 
-const getContract = (name)=>{
+const getContract = (name) => {
 	const contract = contracts[networkId]?.find((t) => t.name === name);
 
 	if (!contract)
 		throw new Error(`Contract ${name} not available on network ${networkId}`);
 	return contract;
-
-}
+};
 
 module.exports = {
 	allowance,
@@ -122,7 +123,7 @@ module.exports = {
 	impersonateTokens,
 	tokens,
 	getToken,
-  contracts,
-  getContract,
+	contracts,
+	getContract,
 	transfer,
 };
