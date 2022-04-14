@@ -35,7 +35,7 @@ describe("Liquidity Manager", () => {
 	});
 	describe("add liquidity", async () => {
 		beforeEach(async () => {
-			liquidityAmount = parseEther("10");
+			liquidityAmount = parseEther("10"); // 10$ dai
 			minToken = 1;
 			minEth = 1;
 
@@ -71,7 +71,7 @@ describe("Liquidity Manager", () => {
 					liquidityAmount,
 					minToken,
 					minEth,
-					{ value: liquidityAmount }
+					{ value: parseEther("0.00334191") } // 10$ en eth
 				)
 			)
 				.to.emit(liquidityManager, "AddLiquidity")
