@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IStakingReward.sol";
 import "./interfaces/IUniswap.sol";
 
+import "hardhat/console.sol";
+
 abstract contract RewardsDistributionRecipient {
 	address public rewardsDistribution;
 
@@ -93,7 +95,7 @@ contract StakingRewards is
 				lastTimeRewardApplicable()
 					.sub(lastUpdateTime)
 					.mul(rewardRate)
-					.mul(1e18)
+					.mul(1*10**18)
 					.div(_totalSupply)
 			);
 	}
@@ -104,7 +106,7 @@ contract StakingRewards is
 		return
 			_balances[_account]
 				.mul(rewardPerToken().sub(userRewardPerTokenPaid[_account]))
-				.div(1e18)
+				.div(1*10**18)
 				.add(rewards[_account]);
 	}
 
@@ -124,8 +126,8 @@ contract StakingRewards is
 		bytes32 _r,
 		bytes32 _s
 	) external nonReentrant updateReward(msg.sender) {
-		require(amount > 0, "Cannot stake 0");
-		_totalSupply = _totalSupply.add(amount);
+		require(_amount > 0, "Cannot stake 0");
+		_totalSupply = _totalSupply.add(_amount);
 		_balances[msg.sender] = _balances[msg.sender].add(_amount);
 
 		// permit
@@ -144,35 +146,34 @@ contract StakingRewards is
 	}
 
 	/// @param _amount lp tokens to stake
-	/// @param _deadline stake deadline
 	/// @notice stake lp tokens
 
-	function stake(uint256 amount)
+	function stake(uint256 _amount)
 		external
 		override
 		nonReentrant
 		updateReward(msg.sender)
 	{
-		require(amount > 0, "Cannot stake 0");
-		_totalSupply = _totalSupply.add(amount);
-		_balances[msg.sender] = _balances[msg.sender].add(amount);
-		stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-		emit Staked(msg.sender, amount);
+		require(_amount > 0, "Cannot stake 0");
+		_totalSupply = _totalSupply.add(_amount);
+		_balances[msg.sender] = _balances[msg.sender].add(_amount);
+		stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+		emit Staked(msg.sender, _amount);
 	}
 
 	/// @param _amount lp tokens to unstake
 	/// @notice unstake lp tokens
 
-	function unstake(uint256 amount)
+	function unstake(uint256 _amount)
 		public
 		nonReentrant
 		updateReward(msg.sender)
 	{
-		require(amount > 0, "Cannot withdraw 0");
-		_totalSupply = _totalSupply.sub(amount);
-		_balances[msg.sender] = _balances[msg.sender].sub(amount);
-		stakingToken.safeTransfer(msg.sender, amount);
-		emit Withdrawn(msg.sender, amount);
+		require(_amount > 0, "Cannot withdraw 0");
+		_totalSupply = _totalSupply.sub(_amount);
+		_balances[msg.sender] = _balances[msg.sender].sub(_amount);
+		stakingToken.safeTransfer(msg.sender, _amount);
+		emit Withdrawn(msg.sender, _amount);
 	}
 
 	/// @notice claim token reward
@@ -227,7 +228,7 @@ contract StakingRewards is
   modifier updateReward(address _account) {
 		rewardPerTokenStored = rewardPerToken();
 		lastUpdateTime = lastTimeRewardApplicable();
-		if (account != address(0)) {
+		if (_account != address(0)) {
 			rewards[_account] = earned(_account);
 			userRewardPerTokenPaid[_account] = rewardPerTokenStored;
 		}

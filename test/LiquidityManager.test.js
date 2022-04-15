@@ -10,7 +10,7 @@ const {
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas, getReceipt } = require("../utils/transactions");
+const { printGas } = require("../utils/transactions");
 //
 describe("Liquidity Manager", () => {
 	beforeEach(async () => {
