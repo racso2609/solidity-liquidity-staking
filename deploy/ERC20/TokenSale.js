@@ -1,13 +1,13 @@
 const CONTRACT_NAME = "TokenSale";
 // const { utils } = ethers;
 
-const TOKEN_PRICE = ethers.utils.parseUnits("1","wei");
+const TOKEN_PRICE = ethers.utils.parseUnits("1", "wei");
 
 // modify when needed
 module.exports = async ({ getNamedAccounts, deployments }) => {
 	const { deploy } = deployments;
 	const { deployer } = await getNamedAccounts();
-	const Token = await deployments.get("Token");
+	const Token = await deployments.get("RewardToken");
 
 	// Upgradeable Proxy
 	await deploy(CONTRACT_NAME, {
@@ -17,5 +17,5 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	});
 };
 
-module.exports.tags = [CONTRACT_NAME,'ERC20'];
-module.exports.dependencies = ["Token"];
+module.exports.tags = [CONTRACT_NAME, "ERC20"];
+module.exports.dependencies = ["RewardToken"];

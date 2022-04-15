@@ -1,5 +1,4 @@
-const CONTRACT_NAME = "Token";
-const { utils } = ethers;
+const CONTRACT_NAME = "RewardToken";
 
 // modify when needed
 module.exports = async ({ getNamedAccounts, deployments }) => {

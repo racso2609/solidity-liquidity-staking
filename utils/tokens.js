@@ -86,6 +86,11 @@ const tokens = {
 			symbol: "WETH",
 			address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 		},
+		{
+			decimals: 18,
+			symbol: "UDAI",
+			address: "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11",
+		},
 	],
 	[137]: [
 		{
