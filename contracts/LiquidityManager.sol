@@ -39,7 +39,7 @@ contract LiquidityManager  {
 			_amountTokenB,
 			_amountTokenMin,
 			_amountEthMin,
-			address(this),
+			msg.sender,
 			block.timestamp + DEADLINE
 		);
     emit AddLiquidity(weth,_tokenB,liquidity,amountEth,amountToken);

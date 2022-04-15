@@ -1,4 +1,4 @@
-const CONTRACT_NAME = "Token";
+const CONTRACT_NAME = "RewardToken";
 const { utils } = ethers;
 
 // modify when needed

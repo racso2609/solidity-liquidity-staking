@@ -85,7 +85,7 @@ describe("Liquidity Manager", () => {
 				from: deployer,
 			});
 
-			expect(preBalanceOfUDAI).to.be.gt(postBalanceOfUDAI);
+			expect(postBalanceOfUDAI).to.be.gt(preBalanceOfUDAI);
 		});
 		it("add liquidity event", async () => {
 			await allowance({

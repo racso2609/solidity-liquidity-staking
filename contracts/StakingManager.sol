@@ -42,7 +42,7 @@ contract StakingRewardsFactory is Ownable {
         rewardsToken = _rewardsToken;
         stakingRewardsGenesis = _stakingRewardsGenesis;
         stakingToken = _stakingToken;
-        stakingRewardsTokenInfo.stakingRewards = address(new stakingRewards(/*_rewardsDistribution=*/ address(this), rewardsToken, stakingToken));
+        stakingRewardsTokenInfo.stakingRewards = address(new StakingRewards(/*_rewardsDistribution=*/ address(this), rewardsToken, stakingToken));
         stakingRewardsTokenInfo.rewardAmount = rewardAmount;
         stakingRewardsTokenInfo.duration = rewardsDuration;
     }
@@ -62,7 +62,7 @@ contract StakingRewardsFactory is Ownable {
 
     // notify reward amount for an individual staking token.
     // this is a fallback in case the notifyRewardAmounts costs too much gas to call for all contracts
-    function notifyRewardAmount(address stakingToken) public {
+    function notifyRewardAmount() public {
         require(block.timestamp >= stakingRewardsGenesis, 'StakingManager::notifyRewardAmount: not ready');
         require(stakingRewardsTokenInfo.stakingRewards != address(0), 'StakingManager::notifyRewardAmount: not deployed');
 
