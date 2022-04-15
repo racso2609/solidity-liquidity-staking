@@ -6,6 +6,7 @@ const {
 	getContract,
 	getToken,
 	allowance,
+	balanceOf,
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
@@ -45,6 +46,7 @@ describe("Liquidity Manager", () => {
 				tokenAddress: DAI_TOKEN.address,
 				amount: liquidityAmount,
 			});
+			UDAI_TOKEN = getToken("UDAI");
 		});
 		it("fail dont make approve", async () => {
 			await expect(
@@ -58,6 +60,34 @@ describe("Liquidity Manager", () => {
 			).to.be.reverted;
 		});
 		it("add liquidity successfully", async () => {
+			await allowance({
+				to: liquidityManager.address,
+				from: deployer,
+				tokenAddress: DAI_TOKEN.address,
+				amount: liquidityAmount,
+			});
+			const preBalanceOfUDAI = await balanceOf({
+				tokenAddress: UDAI_TOKEN.address,
+				from: liquidityManager.address,
+			});
+
+			const tx = await liquidityManager.addLiquidityEth(
+				DAI_TOKEN.address,
+				liquidityAmount,
+				minToken,
+				minEth,
+				{ value: liquidityAmount }
+			);
+			await printGas(tx);
+
+			const postBalanceOfUDAI = await balanceOf({
+				tokenAddress: UDAI_TOKEN.address,
+				from: liquidityManager.address,
+			});
+
+			expect(preBalanceOfUDAI).to.be.gt(postBalanceOfUDAI);
+		});
+		it("add liquidity event", async () => {
 			await allowance({
 				to: liquidityManager.address,
 				from: deployer,
