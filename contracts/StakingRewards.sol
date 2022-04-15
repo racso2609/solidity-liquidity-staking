@@ -12,155 +12,233 @@ import "./interfaces/IStakingReward.sol";
 import "./interfaces/IUniswap.sol";
 
 abstract contract RewardsDistributionRecipient {
-    address public rewardsDistribution;
+	address public rewardsDistribution;
 
-    function notifyRewardAmount(uint256 reward, uint256 duration) external virtual;
+	function notifyRewardAmount(uint256 reward, uint256 duration)
+		external
+		virtual;
 
-    modifier onlyRewardsDistribution() {
-        require(msg.sender == rewardsDistribution, "Caller is not RewardsDistribution contract");
-        _;
-    }
+	modifier onlyRewardsDistribution() {
+		require(
+			msg.sender == rewardsDistribution,
+			"Caller is not RewardsDistribution contract"
+		);
+		_;
+	}
 }
 
-contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, ReentrancyGuard {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+contract StakingRewards is
+	IStakingRewards,
+	RewardsDistributionRecipient,
+	ReentrancyGuard
+{
+	using SafeMath for uint256;
+	using SafeERC20 for IERC20;
 
-    /* ========== STATE VARIABLES ========== */
+	/* ========== STATE VARIABLES ========== */
 
-    IERC20 public rewardsToken;
-    IERC20 public stakingToken;
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
-    uint256 public lastUpdateTime;
-    uint256 public rewardPerTokenStored;
+	IERC20 public rewardsToken;
+	IERC20 public stakingToken;
+	uint256 public periodFinish = 0;
+	uint256 public rewardRate = 0;
+	uint256 public lastUpdateTime;
+	uint256 public rewardPerTokenStored;
 
-    mapping(address => uint256) public userRewardPerTokenPaid;
-    mapping(address => uint256) public rewards;
+	mapping(address => uint256) public userRewardPerTokenPaid;
+	mapping(address => uint256) public rewards;
 
-    uint256 private _totalSupply;
-    mapping(address => uint256) private _balances;
+	uint256 private _totalSupply;
+	mapping(address => uint256) private _balances;
 
-    /* ========== CONSTRUCTOR ========== */
+	/* ========== CONSTRUCTOR ========== */
 
-    constructor(
-        address _rewardsDistribution,
-        address _rewardsToken,
-        address _stakingToken
-    ) public {
-        rewardsToken = IERC20(_rewardsToken);
-        stakingToken = IERC20(_stakingToken);
-        rewardsDistribution = _rewardsDistribution;
-    }
+	constructor(
+		address _rewardsDistribution,
+		address _rewardsToken,
+		address _stakingToken
+	) public {
+		rewardsToken = IERC20(_rewardsToken);
+		stakingToken = IERC20(_stakingToken);
+		rewardsDistribution = _rewardsDistribution;
+	}
 
-    /* ========== VIEWS ========== */
+	/* ========== VIEWS ========== */
+	/// @notice return the total lp tokens on stake
+	function totalSupply() external view override returns (uint256) {
+		return _totalSupply;
+	}
 
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
+	/// @param _account user balance
+	/// @notice return the balance lp tokens on stake
+	function balanceOf(address _account)
+		external
+		view
+		override
+		returns (uint256)
+	{
+		return _balances[_account];
+	}
 
-    function balanceOf(address account) external view override returns (uint256) {
-        return _balances[account];
-    }
+	/// @notice return npi
+	function lastTimeRewardApplicable() public view override returns (uint256) {
+		return Math.min(block.timestamp, periodFinish);
+	}
 
-    function lastTimeRewardApplicable() public view override returns (uint256) {
-        return Math.min(block.timestamp, periodFinish);
-    }
+	function rewardPerToken() public view override returns (uint256) {
+		if (_totalSupply == 0) {
+			return rewardPerTokenStored;
+		}
+		return
+			rewardPerTokenStored.add(
+				lastTimeRewardApplicable()
+					.sub(lastUpdateTime)
+					.mul(rewardRate)
+					.mul(1e18)
+					.div(_totalSupply)
+			);
+	}
 
-    function rewardPerToken() public view override returns (uint256) {
-        if (_totalSupply == 0) {
-            return rewardPerTokenStored;
-        }
-        return
-            rewardPerTokenStored.add(
-                lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(_totalSupply)
-            );
-    }
+	/// @param _account user earned
+	/// @notice return earned amount
+	function earned(address _account) public view override returns (uint256) {
+		return
+			_balances[_account]
+				.mul(rewardPerToken().sub(userRewardPerTokenPaid[_account]))
+				.div(1e18)
+				.add(rewards[_account]);
+	}
 
-    function earned(address account) public view override returns (uint256) {
-        return _balances[account].mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
-    }
+	/* ========== MUTATIVE FUNCTIONS ========== */
 
-    /* ========== MUTATIVE FUNCTIONS ========== */
+	/// @param _amount lp tokens to stake
+	/// @param _deadline stake deadline
+	/// @param _v signature param
+	/// @param _r signature param
+	/// @param _s signature param
+	/// @notice stake lp tokens with signature
 
-    function stakeWithPermit(uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) external nonReentrant updateReward(msg.sender) {
-        require(amount > 0, "Cannot stake 0");
-        _totalSupply = _totalSupply.add(amount);
-        _balances[msg.sender] = _balances[msg.sender].add(amount);
+	function stakeWithPermit(
+		uint256 _amount,
+		uint256 _deadline,
+		uint8 _v,
+		bytes32 _r,
+		bytes32 _s
+	) external nonReentrant updateReward(msg.sender) {
+		require(amount > 0, "Cannot stake 0");
+		_totalSupply = _totalSupply.add(amount);
+		_balances[msg.sender] = _balances[msg.sender].add(_amount);
 
-        // permit
-        IUniswap(address(stakingToken)).permit(msg.sender, address(this), amount, deadline, v, r, s);
+		// permit
+		IUniswap(address(stakingToken)).permit(
+			msg.sender,
+			address(this),
+			_amount,
+			_deadline,
+			_v,
+			_r,
+			_s
+		);
 
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
-    }
+		stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+		emit Staked(msg.sender, _amount);
+	}
 
-    function stake(uint256 amount) external override nonReentrant updateReward(msg.sender) {
-        require(amount > 0, "Cannot stake 0");
-        _totalSupply = _totalSupply.add(amount);
-        _balances[msg.sender] = _balances[msg.sender].add(amount);
-        stakingToken.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
-    }
+	/// @param _amount lp tokens to stake
+	/// @param _deadline stake deadline
+	/// @notice stake lp tokens
 
-    function unstake(uint256 amount) public  nonReentrant updateReward(msg.sender) {
-        require(amount > 0, "Cannot withdraw 0");
-        _totalSupply = _totalSupply.sub(amount);
-        _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        stakingToken.safeTransfer(msg.sender, amount);
-        emit Withdrawn(msg.sender, amount);
-    }
+	function stake(uint256 amount)
+		external
+		override
+		nonReentrant
+		updateReward(msg.sender)
+	{
+		require(amount > 0, "Cannot stake 0");
+		_totalSupply = _totalSupply.add(amount);
+		_balances[msg.sender] = _balances[msg.sender].add(amount);
+		stakingToken.safeTransferFrom(msg.sender, address(this), amount);
+		emit Staked(msg.sender, amount);
+	}
 
-    function claimTokens() public  nonReentrant updateReward(msg.sender) {
-        uint256 reward = rewards[msg.sender];
-        if (reward > 0) {
-            rewards[msg.sender] = 0;
-            rewardsToken.safeTransfer(msg.sender, reward);
-            emit RewardPaid(msg.sender, reward);
-        }
-    }
+	/// @param _amount lp tokens to unstake
+	/// @notice unstake lp tokens
 
-    /* ========== RESTRICTED FUNCTIONS ========== */
+	function unstake(uint256 amount)
+		public
+		nonReentrant
+		updateReward(msg.sender)
+	{
+		require(amount > 0, "Cannot withdraw 0");
+		_totalSupply = _totalSupply.sub(amount);
+		_balances[msg.sender] = _balances[msg.sender].sub(amount);
+		stakingToken.safeTransfer(msg.sender, amount);
+		emit Withdrawn(msg.sender, amount);
+	}
 
-    function notifyRewardAmount(uint256 reward, uint256 rewardsDuration) external override onlyRewardsDistribution updateReward(address(0)) {
-        require(block.timestamp.add(rewardsDuration) >= periodFinish, "Cannot reduce existing period");
-    
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(rewardsDuration);
-        } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(rewardsDuration);
-        }
+	/// @notice claim token reward
+	function claimTokens() public nonReentrant updateReward(msg.sender) {
+		uint256 reward = rewards[msg.sender];
+		if (reward > 0) {
+			rewards[msg.sender] = 0;
+			rewardsToken.safeTransfer(msg.sender, reward);
+			emit RewardPaid(msg.sender, reward);
+		}
+	}
 
-        // Ensure the provided reward amount is not more than the balance in the contract.
-        // This keeps the reward rate in the right range, preventing overflows due to
-        // very high values of rewardRate in the earned and rewardsPerToken functions;
-        // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
+	/* ========== RESTRICTED FUNCTIONS ========== */
 
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp.add(rewardsDuration);
-        emit RewardAdded(reward, periodFinish);
-    }
+	function notifyRewardAmount(uint256 reward, uint256 rewardsDuration)
+		external
+		override
+		onlyRewardsDistribution
+		updateReward(address(0))
+	{
+		require(
+			block.timestamp.add(rewardsDuration) >= periodFinish,
+			"Cannot reduce existing period"
+		);
 
-    /* ========== MODIFIERS ========== */
+		if (block.timestamp >= periodFinish) {
+			rewardRate = reward.div(rewardsDuration);
+		} else {
+			uint256 remaining = periodFinish.sub(block.timestamp);
+			uint256 leftover = remaining.mul(rewardRate);
+			rewardRate = reward.add(leftover).div(rewardsDuration);
+		}
 
-    modifier updateReward(address account) {
-        rewardPerTokenStored = rewardPerToken();
-        lastUpdateTime = lastTimeRewardApplicable();
-        if (account != address(0)) {
-            rewards[account] = earned(account);
-            userRewardPerTokenPaid[account] = rewardPerTokenStored;
-        }
-        _;
-    }
+		// Ensure the provided reward amount is not more than the balance in the contract.
+		// This keeps the reward rate in the right range, preventing overflows due to
+		// very high values of rewardRate in the earned and rewardsPerToken functions;
+		// Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
+		uint256 balance = rewardsToken.balanceOf(address(this));
+		require(
+			rewardRate <= balance.div(rewardsDuration),
+			"Provided reward too high"
+		);
 
-    /* ========== EVENTS ========== */
+		lastUpdateTime = block.timestamp;
+		periodFinish = block.timestamp.add(rewardsDuration);
+		emit RewardAdded(reward, periodFinish);
+	}
 
-    event RewardAdded(uint256 reward, uint256 periodFinish);
-    event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 amount);
-    event RewardPaid(address indexed user, uint256 reward);
+	/* ========== MODIFIERS ========== */
+	/// @param _account user to modify earned
+	/// @notice mdify earns values
+  modifier updateReward(address _account) {
+		rewardPerTokenStored = rewardPerToken();
+		lastUpdateTime = lastTimeRewardApplicable();
+		if (account != address(0)) {
+			rewards[_account] = earned(_account);
+			userRewardPerTokenPaid[_account] = rewardPerTokenStored;
+		}
+		_;
+	}
+
+	/* ========== EVENTS ========== */
+
+	event RewardAdded(uint256 reward, uint256 periodFinish);
+	event Staked(address indexed user, uint256 amount);
+	event Withdrawn(address indexed user, uint256 amount);
+	event RewardPaid(address indexed user, uint256 reward);
 }
+

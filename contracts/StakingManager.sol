@@ -17,7 +17,7 @@ contract StakingRewardsFactory is Ownable {
     address public rewardsToken;
     uint public stakingRewardsGenesis;
 
-    // address of LP Tokens ETH/DAI from Uniswap
+    // address of LP Token from Uniswap
     address public stakingToken;
 
     // info about rewards for a particular staking token
@@ -47,21 +47,24 @@ contract StakingRewardsFactory is Ownable {
         stakingRewardsTokenInfo.duration = rewardsDuration;
     }
 
-    ///// permissioned functions
+    // ---------- permissionless functions ----------
 
-    function update(uint rewardAmount, uint256 rewardsDuration) public onlyOwner {
+    /// @param _rewardAmount total staking amount 
+    /// @param _rewardsDuration staking duration
+    /// @notice update staking info 
+
+    function update(uint _rewardAmount, uint256 _rewardsDuration) public onlyOwner {
         require(stakingRewardsTokenInfo.stakingRewards != address(0), 'StakingManager::notifyRewardAmount: not deployed');
 
-        stakingRewardsTokenInfo.rewardAmount = rewardAmount;
-        stakingRewardsTokenInfo.duration = rewardsDuration;
+        stakingRewardsTokenInfo.rewardAmount = _rewardAmount;
+        stakingRewardsTokenInfo.duration = _rewardsDuration;
     }
 
+    // ---------- permissionless functions ----------
 
+     /// @notice notify reward amount for an individual staking token.
+    /// @dev this is a fallback in case the notifyRewardAmounts costs too much gas to call for all contracts 
 
-    ///// permissionless functions
-
-    // notify reward amount for an individual staking token.
-    // this is a fallback in case the notifyRewardAmounts costs too much gas to call for all contracts
     function notifyRewardAmount() public {
         require(block.timestamp >= stakingRewardsGenesis, 'StakingManager::notifyRewardAmount: not ready');
         require(stakingRewardsTokenInfo.stakingRewards != address(0), 'StakingManager::notifyRewardAmount: not deployed');
