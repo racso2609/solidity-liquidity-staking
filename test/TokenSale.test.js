@@ -5,12 +5,12 @@ const { parseEther } = utils;
 
 const TOTAL_SUPPLY = parseEther("100");
 const TOKEN_PRICE = ethers.utils.parseUnits("1", "wei");
-const MAX_QUANTITY_TOKENS = 750_000;
+const MAX_QUANTITY_TOKENS = parseEther("50");
 
 describe("Token Sale", () => {
 	beforeEach(async () => {
-		await fixture(["Token", "TokenSale"]);
-		tokenInstance = await ethers.getContract("Token");
+		await fixture(["RewardToken", "TokenSale"]);
+		tokenInstance = await ethers.getContract("RewardToken");
 
 		tokenSaleInstance = await ethers.getContract("TokenSale");
 		[admin, buyer] = await ethers.getSigners();
@@ -30,7 +30,7 @@ describe("Token Sale", () => {
 		});
 		it("fail buy token msg value with wrong amount", async () => {
 			await expect(
-				tokenSaleInstance.connect(buyer).buyTokens(10, {
+				tokenSaleInstance.connect(buyer).buyTokens(2, {
 					value: 1,
 				})
 			).to.be.revertedWith("wrong eth amount");

@@ -68,7 +68,7 @@ describe("Liquidity Manager", () => {
 			});
 			const preBalanceOfUDAI = await balanceOf({
 				tokenAddress: UDAI_TOKEN.address,
-				from: liquidityManager.address,
+				from: deployer,
 			});
 
 			const tx = await liquidityManager.addLiquidityEth(
@@ -82,7 +82,7 @@ describe("Liquidity Manager", () => {
 
 			const postBalanceOfUDAI = await balanceOf({
 				tokenAddress: UDAI_TOKEN.address,
-				from: liquidityManager.address,
+				from: deployer,
 			});
 
 			expect(preBalanceOfUDAI).to.be.gt(postBalanceOfUDAI);

@@ -26,4 +26,14 @@ function addLiquidityETH(
   address to,
   uint deadline
 ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
+
+function permit(
+	address owner, 
+	address spender, 
+	uint value, 
+	uint deadline, 
+	uint8 v, 
+	bytes32 r, 
+	bytes32 s
+	) external;
 }
