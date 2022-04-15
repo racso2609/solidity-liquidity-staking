@@ -115,6 +115,16 @@ const tokens = {
 			symbol: "DAI",
 			address: "0x95b58a6Bff3D14B7DB2f5cb5F0Ad413DC2940658",
 		},
+		{
+			decimals: 18,
+			symbol: "UDAI",
+			address: "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11",
+		},
+		{
+			decimals: 18,
+			symbol: "WETH",
+			address: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+		},
 	],
 };
 
