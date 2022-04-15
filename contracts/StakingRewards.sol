@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./LiquidityManager.sol";
 
 import "./interfaces/IStakingReward.sol";
-import "./interfaces/IUniswap.sol";
 
 import "hardhat/console.sol";
 
@@ -32,7 +32,8 @@ abstract contract RewardsDistributionRecipient {
 contract StakingRewards is
 	IStakingRewards,
 	RewardsDistributionRecipient,
-	ReentrancyGuard
+	ReentrancyGuard,
+  LiquidityManager
 {
 	using SafeMath for uint256;
 	using SafeERC20 for IERC20;
@@ -57,8 +58,10 @@ contract StakingRewards is
 	constructor(
 		address _rewardsDistribution,
 		address _rewardsToken,
-		address _stakingToken
-	) public {
+		address _stakingToken,
+    address _uniswap,
+    address _weth
+	) LiquidityManager(_uniswap,_weth) public {
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;

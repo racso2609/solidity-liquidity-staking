@@ -3,7 +3,6 @@ const { fixture } = deployments;
 const {
 	impersonateTokens,
 	getImpersonate,
-	getContract,
 	getToken,
 	allowance,
 	balanceOf,
