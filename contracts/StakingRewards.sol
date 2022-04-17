@@ -191,6 +191,9 @@ contract StakingRewards is
 
 	/* ========== RESTRICTED FUNCTIONS ========== */
 
+	///@notice update the reward amount, rewardDuration and notify the new data
+	///@param reward reward amount to add
+	///@param rewardsDuration reward duration time to add
 	function notifyRewardAmount(uint256 reward, uint256 rewardsDuration)
 		external
 		override

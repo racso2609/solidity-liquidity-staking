@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 const { fixture } = deployments;
 const {
 	impersonateTokens,
@@ -19,10 +20,11 @@ describe("stake", () => {
 		UDAI_TOKEN = getToken("UDAI");
 		WETH_TOKEN = getToken("WETH");
 
-		await fixture(["liquidity", "staking", "ERC20"]);
+		await fixture(["liquidity","manager", "staking","ERC20"]);
 		liquidityManager = await ethers.getContract("LiquidityManager");
 		stakingRewards = await ethers.getContract("StakingRewards");
 		rewardToken = await ethers.getContract("RewardToken");
+		//stakingManager = await ethers.getContractAt("StakingManager");
 	});
 
 	describe("stake lps", () => {
@@ -137,5 +139,10 @@ describe("stake", () => {
 					.withArgs(deployer, stakingAmount);
 			});
 		});
+		describe("stake managment", () => {
+			it("deploy a staking reward contract", async () => {
+				
+			})
+		})
 	});
 });
