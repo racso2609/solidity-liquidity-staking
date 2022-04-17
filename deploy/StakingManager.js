@@ -1,6 +1,6 @@
 const CONTRACT_NAME = "StakingManager";
 const { currentTime } = require("../utils/transactions");
-const genesisTime = 7776000 // 3 months
+const genesisTime = 7776000; // 3 months
 
 // modify when needed
 module.exports = async ({ getNamedAccounts, deployments }) => {
@@ -8,16 +8,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	const { deployer } = await getNamedAccounts();
 
 	const RewardToken = await deployments.get("RewardToken");
-    const time = await currentTime() + genesisTime;
+	const time = (await currentTime()) + genesisTime;
 
 	// Upgradeable Proxy
 	await deploy(CONTRACT_NAME, {
 		from: deployer,
 		log: true,
-		args: [
-            time,
-			RewardToken.address,
-		],
+		args: [RewardToken.address, time],
 	});
 };
 

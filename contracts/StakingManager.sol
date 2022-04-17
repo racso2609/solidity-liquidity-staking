@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./StakingRewards.sol";
 import "./interfaces/IUniswap.sol";
 
-contract StakingRewardsFactory is Ownable {
+contract StakingManager is Ownable {
 	// immutables
 	address public rewardsToken;
 	uint256 public stakingRewardsGenesis;
