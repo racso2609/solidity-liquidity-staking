@@ -12,13 +12,13 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./StakingRewards.sol";
 import "./interfaces/IUniswap.sol";
 
-contract StakingRewardsFactory is Ownable {
+contract StakingManager is Ownable {
 	// immutables
 	address public rewardsToken;
 	uint256 public stakingRewardsGenesis;
 
-	// address of LP Token from Uniswap
-	address public stakingToken;
+	// the staking tokens for which the rewards contract has been deployed
+	address[] public stakingTokens;
 
 	// info about rewards for a particular staking token
 	struct StakingRewardsInfo {
@@ -28,16 +28,11 @@ contract StakingRewardsFactory is Ownable {
 	}
 
 	// rewards info by staking token
-	StakingRewardsInfo public stakingRewardsTokenInfo;
+	mapping(address => StakingRewardsInfo) public stakingRewardsTokenInfo;
 
 	constructor(
 		address _rewardsToken,
-		uint256 _stakingRewardsGenesis,
-		address _stakingToken,
-		uint256 rewardAmount,
-		uint256 rewardsDuration,
-    address _uniswap,
-    address _weth
+		uint256 _stakingRewardsGenesis
 	) public Ownable() {
 		require(
 			_stakingRewardsGenesis >= block.timestamp,
@@ -46,71 +41,91 @@ contract StakingRewardsFactory is Ownable {
 
 		rewardsToken = _rewardsToken;
 		stakingRewardsGenesis = _stakingRewardsGenesis;
-		stakingToken = _stakingToken;
-		stakingRewardsTokenInfo.stakingRewards = address(
-			new StakingRewards(
-				address(this),
-				rewardsToken,
-				_stakingToken,
-        _uniswap,
-        _weth
-			)
-		);
-		stakingRewardsTokenInfo.rewardAmount = rewardAmount;
-		stakingRewardsTokenInfo.duration = rewardsDuration;
 	}
 
-	// ---------- permissionless functions ----------
+	// ---------- permissioned functions ----------
+
+    /**
+    * @notice deploy a staking reward contract for the staking token and store the rewards amount
+    * @param rewardAmount total staking amount
+    * @param rewardsDuration staking duration
+    */
+    function deploy(
+        address stakingToken, 
+        uint rewardAmount, 
+        uint rewardsDuration, 
+        address uniswap, 
+        address weth
+        ) public onlyOwner{
+        StakingRewardsInfo storage info = stakingRewardsTokenInfo[stakingToken];
+        require(
+			info.stakingRewards == address(0),
+			"StakingManager::deploy: staking token already deployed"
+		);
+
+        info.stakingRewards = address(
+            new StakingRewards(
+                /*_rewardsDistribution=*/ address(this), 
+                rewardsToken, 
+                stakingToken, 
+                uniswap, 
+                weth));
+        info.rewardAmount = rewardAmount;
+        info.duration = rewardsDuration;
+        stakingTokens.push(stakingToken);
+    }
 
 	/// @param _rewardAmount total staking amount
 	/// @param _rewardsDuration staking duration
 	/// @notice update staking info
 
-	function update(uint256 _rewardAmount, uint256 _rewardsDuration)
+	function update(address stakingToken, uint256 _rewardAmount, uint256 _rewardsDuration)
 		public
 		onlyOwner
 	{
+        StakingRewardsInfo storage info = stakingRewardsTokenInfo[stakingToken];
 		require(
-			stakingRewardsTokenInfo.stakingRewards != address(0),
-			"StakingManager::notifyRewardAmount: not deployed"
+			info.stakingRewards != address(0),
+			"StakingManager::update: not deployed"
 		);
 
-		stakingRewardsTokenInfo.rewardAmount = _rewardAmount;
-		stakingRewardsTokenInfo.duration = _rewardsDuration;
+		info.rewardAmount = _rewardAmount;
+		info.duration = _rewardsDuration;
 	}
 
 	// ---------- permissionless functions ----------
 
 	/// @notice notify reward amount for an individual staking token.
-	/// @dev this is a fallback in case the notifyRewardAmounts costs too much gas to call for all contracts
 
-	function notifyRewardAmount() public {
+	function notifyRewardAmount(address stakingToken) public {
 		require(
 			block.timestamp >= stakingRewardsGenesis,
 			"StakingManager::notifyRewardAmount: not ready"
 		);
+
+        StakingRewardsInfo storage info = stakingRewardsTokenInfo[stakingToken];
 		require(
-			stakingRewardsTokenInfo.stakingRewards != address(0),
+			info.stakingRewards != address(0),
 			"StakingManager::notifyRewardAmount: not deployed"
 		);
 
 		if (
-			stakingRewardsTokenInfo.rewardAmount > 0 &&
-			stakingRewardsTokenInfo.duration > 0
+			info.rewardAmount > 0 &&
+			info.duration > 0
 		) {
-			uint256 rewardAmount = stakingRewardsTokenInfo.rewardAmount;
-			uint256 duration = stakingRewardsTokenInfo.duration;
-			stakingRewardsTokenInfo.rewardAmount = 0;
-			stakingRewardsTokenInfo.duration = 0;
+			uint256 rewardAmount = info.rewardAmount;
+			uint256 duration = info.duration;
+			info.rewardAmount = 0;
+			info.duration = 0;
 
 			require(
 				IERC20(rewardsToken).transfer(
-					stakingRewardsTokenInfo.stakingRewards,
+					info.stakingRewards,
 					rewardAmount
 				),
 				"StakingManager::notifyRewardAmount: transfer failed"
 			);
-			StakingRewards(stakingRewardsTokenInfo.stakingRewards).notifyRewardAmount(
+			StakingRewards(info.stakingRewards).notifyRewardAmount(
 					rewardAmount,
 					duration
 				);

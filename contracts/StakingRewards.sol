@@ -33,7 +33,7 @@ contract StakingRewards is
 	IStakingRewards,
 	RewardsDistributionRecipient,
 	ReentrancyGuard,
-  LiquidityManager
+	LiquidityManager
 {
 	using SafeMath for uint256;
 	using SafeERC20 for IERC20;
@@ -43,9 +43,11 @@ contract StakingRewards is
 	IERC20 public rewardsToken;
 	IERC20 public stakingToken;
 	uint256 public periodFinish = 0;
-	uint256 public rewardRate = 0;
 	uint256 public lastUpdateTime;
+// check this
+	uint256 public rewardRate;
 	uint256 public rewardPerTokenStored;
+// check this
 
 	mapping(address => uint256) public userRewardPerTokenPaid;
 	mapping(address => uint256) public rewards;
@@ -59,9 +61,9 @@ contract StakingRewards is
 		address _rewardsDistribution,
 		address _rewardsToken,
 		address _stakingToken,
-    address _uniswap,
-    address _weth
-	) LiquidityManager(_uniswap,_weth) public {
+		address _uniswap,
+		address _weth
+	) public LiquidityManager(_uniswap, _weth) {
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
@@ -90,6 +92,9 @@ contract StakingRewards is
 	}
 
 	function rewardPerToken() public view override returns (uint256) {
+		console.log("------ rewardPerToken ------");
+		console.log(_totalSupply, rewardPerTokenStored, lastUpdateTime, rewardRate);
+		console.log("------ rewardPerToken ------");
 		if (_totalSupply == 0) {
 			return rewardPerTokenStored;
 		}
@@ -98,7 +103,7 @@ contract StakingRewards is
 				lastTimeRewardApplicable()
 					.sub(lastUpdateTime)
 					.mul(rewardRate)
-					.mul(1*10**18)
+					.mul(1 * 10**18)
 					.div(_totalSupply)
 			);
 	}
@@ -106,10 +111,18 @@ contract StakingRewards is
 	/// @param _account user earned
 	/// @notice return earned amount
 	function earned(address _account) public view override returns (uint256) {
+		console.log("------ earned ------");
+		console.log(
+			_balances[_account],
+			userRewardPerTokenPaid[_account],
+			rewards[_account]
+		);
+
+		console.log("------ earned ------");
 		return
 			_balances[_account]
 				.mul(rewardPerToken().sub(userRewardPerTokenPaid[_account]))
-				.div(1*10**18)
+				.div(1 * 10**18)
 				.add(rewards[_account]);
 	}
 
@@ -182,6 +195,7 @@ contract StakingRewards is
 	/// @notice claim token reward
 	function claimTokens() public nonReentrant updateReward(msg.sender) {
 		uint256 reward = rewards[msg.sender];
+		console.log(reward);
 		if (reward > 0) {
 			rewards[msg.sender] = 0;
 			rewardsToken.safeTransfer(msg.sender, reward);
@@ -228,7 +242,7 @@ contract StakingRewards is
 	/* ========== MODIFIERS ========== */
 	/// @param _account user to modify earned
 	/// @notice mdify earns values
-  modifier updateReward(address _account) {
+	modifier updateReward(address _account) {
 		rewardPerTokenStored = rewardPerToken();
 		lastUpdateTime = lastTimeRewardApplicable();
 		if (_account != address(0)) {
@@ -245,4 +259,3 @@ contract StakingRewards is
 	event Withdrawn(address indexed user, uint256 amount);
 	event RewardPaid(address indexed user, uint256 reward);
 }
-

@@ -6,10 +6,11 @@ const {
 	getToken,
 	allowance,
 	balanceOf,
+	increaseBlocks,
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas, getReceipt } = require("../utils/transactions");
+const { printGas } = require("../utils/transactions");
 
 describe("stake", () => {
 	beforeEach(async () => {
@@ -18,73 +19,76 @@ describe("stake", () => {
 		DAI_TOKEN = getToken("DAI");
 		UDAI_TOKEN = getToken("UDAI");
 		WETH_TOKEN = getToken("WETH");
+		userSigner = await ethers.getSigner(user);
 
-		await fixture(["liquidity", "staking", "ERC20"]);
+		await fixture(["liquidity", "manager", "staking", "ERC20"]);
 		liquidityManager = await ethers.getContract("LiquidityManager");
 		stakingRewards = await ethers.getContract("StakingRewards");
 		rewardToken = await ethers.getContract("RewardToken");
+		//stakingManager = await ethers.getContractAt("StakingManager");
 	});
 
 	describe("stake lps", () => {
 		// provide liquidity to get lp
 		beforeEach(async () => {
-			liquidityAmount = parseEther("10");
+			liquidityAmount = parseEther("5");
 			minToken = 1;
 			minEth = 1;
 
 			await impersonateTokens({
-				to: deployer,
+				to: user,
 				from: getImpersonate("DAI").address, //dai impersonate
 				tokenAddress: DAI_TOKEN.address,
 				amount: liquidityAmount,
 			});
+
 			await allowance({
 				to: liquidityManager.address,
-				from: deployer,
+				from: user,
 				tokenAddress: DAI_TOKEN.address,
 				amount: liquidityAmount,
 			});
 
-			const tx = await liquidityManager.addLiquidityEth(
-				DAI_TOKEN.address,
-				liquidityAmount,
-				minToken,
-				minEth,
-				{ value: liquidityAmount }
-			);
+			const tx = await liquidityManager
+				.connect(userSigner)
+				.addLiquidityEth(DAI_TOKEN.address, liquidityAmount, minToken, minEth, {
+					value: liquidityAmount,
+				});
 			await printGas(tx);
 			stakingAmount = 100;
 			await allowance({
 				tokenAddress: UDAI_TOKEN.address,
 				amount: stakingAmount,
-				from: deployer,
+				from: user,
 				to: stakingRewards.address,
 			});
 		});
 		describe("normal stake", () => {
 			it("normal stake fail amount 0", async () => {
-				await expect(stakingRewards.stake(0)).to.be.revertedWith(
-					"Cannot stake 0"
-				);
+				await expect(
+					stakingRewards.connect(userSigner).stake(0)
+				).to.be.revertedWith("Cannot stake 0");
 			});
 			it("stake successfully", async () => {
 				const preTotalSupply = await stakingRewards.totalSupply();
-				const preBalance = await stakingRewards.balanceOf(deployer);
+				const preBalance = await stakingRewards.balanceOf(user);
 
 				const preStakingBalance = await balanceOf({
 					tokenAddress: UDAI_TOKEN.address,
-					from: deployer,
+					from: user,
 				});
 
-				const tx = await stakingRewards.stake(stakingAmount);
+				const tx = await stakingRewards
+					.connect(userSigner)
+					.stake(stakingAmount);
 				await printGas(tx);
 
 				const postTotalSupply = await stakingRewards.totalSupply();
 
-				const postBalance = await stakingRewards.balanceOf(deployer);
+				const postBalance = await stakingRewards.balanceOf(user);
 				const postStakingBalance = await balanceOf({
 					tokenAddress: UDAI_TOKEN.address,
-					from: deployer,
+					from: user,
 				});
 
 				expect(postTotalSupply).to.be.gt(preTotalSupply);
@@ -92,14 +96,16 @@ describe("stake", () => {
 				expect(preStakingBalance).to.be.gt(postStakingBalance);
 			});
 			it("stake event", async () => {
-				await expect(stakingRewards.stake(stakingAmount))
+				await expect(stakingRewards.connect(userSigner).stake(stakingAmount))
 					.to.emit(stakingRewards, "Staked")
-					.withArgs(deployer, stakingAmount);
+					.withArgs(user, stakingAmount);
 			});
 		});
 		describe("unstake", () => {
 			beforeEach(async () => {
-				const tx = await stakingRewards.stake(stakingAmount);
+				const tx = await stakingRewards
+					.connect(userSigner)
+					.stake(stakingAmount);
 				await printGas(tx);
 			});
 			it("unstake fail amount 0", async () => {
@@ -109,32 +115,94 @@ describe("stake", () => {
 			});
 			it("unstake successfully", async () => {
 				const preTotalSupply = await stakingRewards.totalSupply();
-				const preBalance = await stakingRewards.balanceOf(deployer);
+				const preBalance = await stakingRewards.balanceOf(user);
 
 				const preStakingBalance = await balanceOf({
 					tokenAddress: UDAI_TOKEN.address,
-					from: deployer,
+					from: user,
 				});
 
-				const tx = await stakingRewards.unstake(stakingAmount);
+				const tx = await stakingRewards
+					.connect(userSigner)
+					.unstake(stakingAmount);
 				await printGas(tx);
 
-				const postTotalSupply = await stakingRewards.totalSupply();
+				const postTotalSupply = await stakingRewards
+					.connect(userSigner)
+					.totalSupply();
 
-				const postBalance = await stakingRewards.balanceOf(deployer);
+				const postBalance = await stakingRewards
+					.connect(userSigner)
+					.balanceOf(user);
 				const postStakingBalance = await balanceOf({
 					tokenAddress: UDAI_TOKEN.address,
-					from: deployer,
+					from: user,
 				});
 
 				expect(postTotalSupply).to.be.lt(preTotalSupply);
 				expect(postBalance).to.be.lt(preBalance);
 				expect(preStakingBalance).to.be.lt(postStakingBalance);
 			});
-			it("stake event", async () => {
-				await expect(stakingRewards.unstake(stakingAmount))
+			it("unstake event", async () => {
+				await expect(stakingRewards.connect(userSigner).unstake(stakingAmount))
 					.to.emit(stakingRewards, "Withdrawn")
-					.withArgs(deployer, stakingAmount);
+					.withArgs(user, stakingAmount);
+			});
+		});
+		describe("claim tokens", () => {
+			beforeEach(async () => {
+				await impersonateTokens({
+					to: deployer,
+					from: getImpersonate("DAI").address, //dai impersonate
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+				await allowance({
+					to: liquidityManager.address,
+					from: deployer,
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+
+				let tx = await liquidityManager.addLiquidityEth(
+					DAI_TOKEN.address,
+					liquidityAmount,
+					minToken,
+					minEth,
+					{
+						value: liquidityAmount,
+					}
+				);
+				await printGas(tx);
+				await allowance({
+					tokenAddress: UDAI_TOKEN.address,
+					amount: stakingAmount,
+					from: user,
+					to: stakingRewards.address,
+				});
+
+				// tx = await stakingRewards.stake(stakingAmount);
+				// await printGas(tx);
+
+				tx = await stakingRewards.connect(userSigner).stake(stakingAmount);
+				await printGas(tx);
+				// tx = await stakingRewards.notifyRewardAmount(1, 10);
+				// await printGas(tx);
+			});
+			it("claim token", async () => {
+				await increaseBlocks(1000);
+				const preRewardBalance = await balanceOf({
+					tokenAddress: rewardToken.address,
+					from: user,
+				});
+				const tx = await stakingRewards.connect(userSigner).claimTokens();
+				await printGas(tx);
+
+				const postRewardBalance = await balanceOf({
+					tokenAddress: rewardToken.address,
+					from: user,
+				});
+				expect(postRewardBalance).to.be.gt(preRewardBalance);
 			});
 		});
 	});
