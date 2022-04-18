@@ -12,14 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	await deploy(CONTRACT_NAME, {
 		from: deployer,
 		log: true,
-		proxy: {
-			execute: {
-				init: {
-					methodName: "__initializeLiquidity__",
-					args: [UNISWAP.address, WETH_TOKEN.address],
-				},
-			},
-		},
+		args: [UNISWAP.address, WETH_TOKEN.address],
 	});
 };
 

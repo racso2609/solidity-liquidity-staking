@@ -59,17 +59,16 @@ contract StakingRewards is
 
 	/* ========== CONSTRUCTOR ========== */
 
-	function initialize(
+	constructor(
 		address _rewardsDistribution,
 		address _rewardsToken,
 		address _stakingToken,
 		address _uniswap,
 		address _weth
-	) initializer  public{
+	) LiquidityManager(_uniswap,_weth){
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
-		__initializeLiquidity__(_uniswap, _weth);
 	}
 
 	/* ========== VIEWS ========== */

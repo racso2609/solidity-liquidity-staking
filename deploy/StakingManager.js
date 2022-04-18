@@ -14,7 +14,14 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	await deploy(CONTRACT_NAME, {
 		from: deployer,
 		log: true,
-		args: [RewardToken.address, time],
+		proxy: {
+			execute: {
+				init: {
+					methodName: "initialize",
+					args: [RewardToken.address, time],
+				},
+			},
+		},
 	});
 };
 
