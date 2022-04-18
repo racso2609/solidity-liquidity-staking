@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:  UNLICENSE
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.7;
 
 interface IUniswap {
 	function addLiquidity(

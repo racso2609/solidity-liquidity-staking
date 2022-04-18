@@ -1,7 +1,7 @@
 //  SPDX-License-Identifier:  UNLICENSE
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.7;
 import "./RewardToken.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TokenSale is Ownable {

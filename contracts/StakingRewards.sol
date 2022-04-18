@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./LiquidityManager.sol";
 
 import "./interfaces/IStakingReward.sol";
@@ -44,10 +44,10 @@ contract StakingRewards is
 	IERC20 public stakingToken;
 	uint256 public periodFinish = 0;
 	uint256 public lastUpdateTime;
-// check this
+	// check this
 	uint256 public rewardRate;
 	uint256 public rewardPerTokenStored;
-// check this
+	// check this
 
 	mapping(address => uint256) public userRewardPerTokenPaid;
 	mapping(address => uint256) public rewards;
@@ -63,7 +63,7 @@ contract StakingRewards is
 		address _stakingToken,
 		address _uniswap,
 		address _weth
-	) public LiquidityManager(_uniswap, _weth) {
+	)  LiquidityManager(_uniswap, _weth) {
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
@@ -151,13 +151,12 @@ contract StakingRewards is
 			msg.sender,
 			address(this),
 			_amount,
-			_deadline,
+			block.timestamp + _deadline,
 			_v,
 			_r,
 			_s
 		);
 
-		stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
 		emit Staked(msg.sender, _amount);
 	}
 

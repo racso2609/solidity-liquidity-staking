@@ -1,9 +1,9 @@
 // SPDX-License-Identifier:  UNLICENSE
-pragma solidity ^0.6.6;
+pragma solidity ^0.8.7;
 import "./interfaces/IUniswap.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract LiquidityManager {
 	using SafeERC20 for IERC20;
@@ -11,7 +11,7 @@ contract LiquidityManager {
 	uint256 constant DEADLINE = 5 minutes;
 	address public weth;
 
-	constructor(address _uniswap, address _weth) public {
+	constructor(address _uniswap, address _weth) {
 		uniswap = IUniswap(_uniswap);
 		weth = _weth;
 	}
