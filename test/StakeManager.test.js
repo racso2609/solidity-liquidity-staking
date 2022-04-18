@@ -6,11 +6,12 @@ const {
 	getToken,
 	allowance,
 	balanceOf,
-	increaseBlocks,
+	getContract,
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas } = require("../utils/transactions");
+const { printGas, increaseBlocks } = require("../utils/transactions");
+const { signERC2612Permit } = require("eth-permit");
 
 describe("stake", () => {
 	beforeEach(async () => {
@@ -19,6 +20,7 @@ describe("stake", () => {
 		DAI_TOKEN = getToken("DAI");
 		UDAI_TOKEN = getToken("UDAI");
 		WETH_TOKEN = getToken("WETH");
+		UNISWAP = getContract("UNISWAP");
 		userSigner = await ethers.getSigner(user);
 
 		await fixture(["liquidity", "manager", "staking", "ERC20"]);
@@ -95,10 +97,88 @@ describe("stake", () => {
 				expect(postBalance).to.be.gt(preBalance);
 				expect(preStakingBalance).to.be.gt(postStakingBalance);
 			});
+
 			it("stake event", async () => {
 				await expect(stakingRewards.connect(userSigner).stake(stakingAmount))
 					.to.emit(stakingRewards, "Staked")
 					.withArgs(user, stakingAmount);
+			});
+		});
+		describe("permit", () => {
+			beforeEach(async () => {
+				liquidityAmount = parseEther("5");
+				minToken = 1;
+				minEth = 1;
+
+				await impersonateTokens({
+					to: user,
+					from: getImpersonate("DAI").address, //dai impersonate
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+
+				await allowance({
+					to: liquidityManager.address,
+					from: user,
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+
+				const tx = await liquidityManager
+					.connect(userSigner)
+					.addLiquidityEth(
+						DAI_TOKEN.address,
+						liquidityAmount,
+						minToken,
+						minEth,
+						{
+							value: liquidityAmount,
+						}
+					);
+				await printGas(tx);
+				stakingAmount = 100;
+				result = await signERC2612Permit(
+					userSigner,
+					UDAI_TOKEN.address,
+					user,
+					// UNISWAP.address,
+					stakingRewards.address,
+					// UDAI_TOKEN.address,
+					stakingAmount
+				);
+			});
+			it("stake successfully with permit", async () => {
+				const preTotalSupply = await stakingRewards.totalSupply();
+
+				const preBalance = await stakingRewards.balanceOf(user);
+
+				const preStakingBalance = await balanceOf({
+					tokenAddress: UDAI_TOKEN.address,
+					from: user,
+				});
+
+				const tx = await stakingRewards
+					.connect(userSigner)
+					.stakeWithPermit(
+						stakingAmount,
+						result.deadline,
+						result.v,
+						result.r,
+						result.s
+					);
+				await printGas(tx);
+
+				const postTotalSupply = await stakingRewards.totalSupply();
+
+				const postBalance = await stakingRewards.balanceOf(user);
+				const postStakingBalance = await balanceOf({
+					tokenAddress: UDAI_TOKEN.address,
+					from: user,
+				});
+
+				expect(postTotalSupply).to.be.gt(preTotalSupply);
+				expect(postBalance).to.be.gt(preBalance);
+				expect(preStakingBalance).to.be.gt(postStakingBalance);
 			});
 		});
 		describe("unstake", () => {

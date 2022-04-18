@@ -151,7 +151,7 @@ contract StakingRewards is
 			msg.sender,
 			address(this),
 			_amount,
-			block.timestamp + _deadline,
+			_deadline,
 			_v,
 			_r,
 			_s
