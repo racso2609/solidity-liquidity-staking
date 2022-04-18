@@ -6,10 +6,11 @@ const {
 	getToken,
 	allowance,
 	balanceOf,
+	increaseBlocks,
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas, increaseBlocks } = require("../utils/transactions");
+const { printGas } = require("../utils/transactions");
 
 describe("stake", () => {
 	beforeEach(async () => {
@@ -18,13 +19,13 @@ describe("stake", () => {
 		DAI_TOKEN = getToken("DAI");
 		UDAI_TOKEN = getToken("UDAI");
 		WETH_TOKEN = getToken("WETH");
+		userSigner = await ethers.getSigner(user);
 
-		await fixture(["liquidity", "staking", "ERC20"]);
+		await fixture(["liquidity", "manager", "staking", "ERC20"]);
 		liquidityManager = await ethers.getContract("LiquidityManager");
 		stakingRewards = await ethers.getContract("StakingRewards");
 		rewardToken = await ethers.getContract("RewardToken");
-
-		userSigner = await ethers.provider.getSigner(user);
+		//stakingManager = await ethers.getContractAt("StakingManager");
 	});
 
 	describe("stake lps", () => {

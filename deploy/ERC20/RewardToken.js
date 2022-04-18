@@ -1,6 +1,4 @@
-const CONTRACT_NAME = "Token";
-const { utils } = ethers;
-const TOTAL_SUPPLY = utils.parseEther("100");
+const CONTRACT_NAME = "RewardToken";
 
 // modify when needed
 module.exports = async ({ getNamedAccounts, deployments }) => {
@@ -11,7 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	await deploy(CONTRACT_NAME, {
 		from: deployer,
 		log: true,
-		args: [TOTAL_SUPPLY],
+		args: [],
 	});
 };
 
