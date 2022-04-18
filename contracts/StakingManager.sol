@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.6;
+pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -132,7 +133,8 @@ contract StakingManager is Ownable {
 		}
 	}
 
-	function pullExtraTokens(address token, uint256 amount) external onlyOwner {
-		IERC20(token).transfer(msg.sender, amount);
+	// ---------- getters ----------
+	function getStakingToken(address stakingToken) public view returns(StakingRewardsInfo memory) {
+		return stakingRewardsTokenInfo[stakingToken];
 	}
 }
