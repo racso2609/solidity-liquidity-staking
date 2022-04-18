@@ -37,7 +37,7 @@ contract LiquidityManager  {
 		uint256 _amountTokenB,
 		uint256 _amountTokenMin,
 		uint256 _amountEthMin
-	) external payable {
+	) public payable returns(uint256,uint256,uint256) {
 		IERC20(_tokenB).safeTransferFrom(msg.sender, address(this), _amountTokenB);
 		IERC20(_tokenB).safeApprove(address(uniswap), _amountTokenB);
 
@@ -51,6 +51,7 @@ contract LiquidityManager  {
 			block.timestamp + DEADLINE
 		);
 		emit AddLiquidity(weth, _tokenB, liquidity, amountEth, amountToken);
+    return (amountToken,amountEth,liquidity);
 	}
 
 	receive() external payable {}

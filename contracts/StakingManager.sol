@@ -18,7 +18,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	address public rewardsToken;
 	uint256 public stakingRewardsGenesis;
 	uint256 constant DEADLINE = 30 minutes;
-	uint256 poolsAmounts;
+	uint256 public poolsAmounts;
 
 	// info about rewards for a particular staking token
 	struct StakingRewardsInfo {
@@ -159,4 +159,5 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		StakingRewards(stakingRewardsTokenInfo[_stakeId].stakingRewards)
 			.stakeWithPermit(_amount, DEADLINE, _v, _r, _s);
 	}
+  
 }

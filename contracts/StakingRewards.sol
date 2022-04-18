@@ -65,13 +65,12 @@ contract StakingRewards is
 		address _stakingToken,
 		address _uniswap,
 		address _weth
-	) LiquidityManager(_uniswap,_weth){
+	) LiquidityManager(_uniswap, _weth) {
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
 	}
 
-	/* ========== VIEWS ========== */
 	/// @notice return the total lp tokens on stake
 	function totalSupply() external view override returns (uint256) {
 		return _totalSupply;
@@ -143,7 +142,7 @@ contract StakingRewards is
 		uint8 _v,
 		bytes32 _r,
 		bytes32 _s
-	) external nonReentrant updateReward(msg.sender) {
+	) public nonReentrant updateReward(msg.sender) {
 		require(_amount > 0, "Cannot stake 0");
 		_totalSupply = _totalSupply.add(_amount);
 		_balances[msg.sender] = _balances[msg.sender].add(_amount);
@@ -166,7 +165,7 @@ contract StakingRewards is
 	/// @notice stake lp tokens
 
 	function stake(uint256 _amount)
-		external
+		public
 		override
 		nonReentrant
 		updateReward(msg.sender)
@@ -176,6 +175,21 @@ contract StakingRewards is
 		_balances[msg.sender] = _balances[msg.sender].add(_amount);
 		stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
 		emit Staked(msg.sender, _amount);
+	}
+
+	function addLiquidityAndStake(
+		address _tokenB,
+		uint256 _amountTokenB,
+		uint256 _amountTokenMin,
+		uint256 _amountEthMin
+	
+	) external payable {
+		(
+			uint256 amountToken,
+			uint256 amountEth,
+			uint256 liquidity
+		) = addLiquidityEth(_tokenB, _amountTokenB, _amountTokenMin, _amountEthMin);
+		stake(liquidity);
 	}
 
 	/// @param _amount lp tokens to unstake
