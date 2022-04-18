@@ -63,14 +63,16 @@ contract StakingManager is Ownable {
 			info.stakingRewards == address(0),
 			"StakingManager::deploy: staking token already deployed"
 		);
-
-        info.stakingRewards = payable (address(
-            new StakingRewards(
-                /*_rewardsDistribution=*/ address(this), 
+         StakingRewards newContract=    new StakingRewards();
+         newContract.initialize(
+ /*_rewardsDistribution=*/ address(this), 
                 rewardsToken, 
                 stakingToken, 
                 uniswap, 
-                weth)));
+                weth
+         );
+
+        info.stakingRewards = payable (address(newContract));
         info.rewardAmount = rewardAmount;
         info.duration = rewardsDuration;
         poolsAmounts++;

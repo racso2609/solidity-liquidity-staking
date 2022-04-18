@@ -18,12 +18,10 @@ describe("Liquidity Manager", () => {
 			await getNamedAccounts());
 		DAI_TOKEN = getToken("DAI");
 
-		// [admin, buyer] = await ethers.getSigners();
-
 		await fixture(["liquidity"]);
 		liquidityManager = await ethers.getContract("LiquidityManager");
-		UNISWAP = getContract("UNISWAP");
 
+		UNISWAP = getContract("UNISWAP");
 		WETH_TOKEN = getToken("WETH");
 	});
 	describe("basic config", () => {
@@ -39,6 +37,7 @@ describe("Liquidity Manager", () => {
 			liquidityAmount = parseEther("10"); // 10$ dai
 			minToken = 1;
 			minEth = 1;
+			ethAmount = parseEther("0.00339243");
 
 			await impersonateTokens({
 				to: deployer,
@@ -55,7 +54,7 @@ describe("Liquidity Manager", () => {
 					liquidityAmount,
 					minToken,
 					minEth,
-					{ value: liquidityAmount }
+					{ value: ethAmount }
 				)
 			).to.be.reverted;
 		});
@@ -76,7 +75,8 @@ describe("Liquidity Manager", () => {
 				liquidityAmount,
 				minToken,
 				minEth,
-				{ value: liquidityAmount }
+
+				{ value: ethAmount }
 			);
 			await printGas(tx);
 
@@ -101,7 +101,7 @@ describe("Liquidity Manager", () => {
 					liquidityAmount,
 					minToken,
 					minEth,
-					{ value: parseEther("0.00334191") } // 10$ en eth
+					{ value: ethAmount }
 				)
 			)
 				.to.emit(liquidityManager, "AddLiquidity")

@@ -4,14 +4,17 @@ import "./interfaces/IUniswap.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract LiquidityManager {
+import "hardhat/console.sol";
+
+contract LiquidityManager is Initializable {
 	using SafeERC20 for IERC20;
 	IUniswap public uniswap;
 	uint256 constant DEADLINE = 5 minutes;
 	address public weth;
 
-	constructor(address _uniswap, address _weth) {
+	function __initializeLiquidity__(address _uniswap, address _weth) initializer public{
 		uniswap = IUniswap(_uniswap);
 		weth = _weth;
 	}
@@ -37,8 +40,7 @@ contract LiquidityManager {
 		uint256 _amountEthMin
 	) external payable {
 		IERC20(_tokenB).safeTransferFrom(msg.sender, address(this), _amountTokenB);
-		IERC20(_tokenB).approve(address(uniswap), _amountTokenB);
-		IERC20(weth).approve(address(uniswap), msg.value);
+		IERC20(_tokenB).safeApprove(address(uniswap), _amountTokenB);
 
 		(uint256 amountToken, uint256 amountEth, uint256 liquidity) = uniswap
 			.addLiquidityETH{ value: msg.value }(

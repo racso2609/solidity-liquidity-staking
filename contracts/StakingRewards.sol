@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "./LiquidityManager.sol";
 
 import "./interfaces/IStakingReward.sol";
@@ -57,16 +59,17 @@ contract StakingRewards is
 
 	/* ========== CONSTRUCTOR ========== */
 
-	constructor(
+	function initialize(
 		address _rewardsDistribution,
 		address _rewardsToken,
 		address _stakingToken,
 		address _uniswap,
 		address _weth
-	)  LiquidityManager(_uniswap, _weth) {
+	) initializer  public{
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
+		__initializeLiquidity__(_uniswap, _weth);
 	}
 
 	/* ========== VIEWS ========== */

@@ -15,13 +15,20 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 	await deploy(CONTRACT_NAME, {
 		from: deployer,
 		log: true,
-		args: [
-			deployer,
-			RewardToken.address,
-			UDAI_TOKEN.address,
-			UNISWAP.address,
-			WETH_TOKEN.address,
-		],
+		proxy: {
+			execute: {
+				init: {
+					methodName: "initialize",
+					args: [
+						deployer,
+						RewardToken.address,
+						UDAI_TOKEN.address,
+						UNISWAP.address,
+						WETH_TOKEN.address,
+					],
+				},
+			},
+		},
 	});
 };
 
