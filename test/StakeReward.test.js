@@ -10,7 +10,7 @@ const {
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas, increaseBlocks } = require("../utils/transactions");
+const { printGas } = require("../utils/transactions");
 const { signERC2612Permit } = require("eth-permit");
 
 describe("stake", () => {

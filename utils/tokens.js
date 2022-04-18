@@ -92,23 +92,6 @@ const tokens = {
 			address: "0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11",
 		},
 	],
-	[137]: [
-		{
-			decimals: 18,
-			symbol: "MATIC",
-			address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
-		},
-		{
-			decimals: 8,
-			symbol: "WBTC",
-			address: "0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6",
-		},
-		{
-			decimals: 18,
-			symbol: "WETH",
-			address: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-		},
-	],
 	[4]: [
 		{
 			decimals: 18,
