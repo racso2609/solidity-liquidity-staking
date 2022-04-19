@@ -20,6 +20,8 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	uint256 constant DEADLINE = 30 minutes;
 	uint256 public poolsAmounts;
 
+  address[] public stakingTokens;
+
 	// info about rewards for a particular staking token
 	struct StakingRewardsInfo {
 		address payable stakingRewards;
@@ -27,7 +29,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		uint256 duration;
 	}
 
-	mapping(uint256 => StakingRewardsInfo) public stakingRewardsTokenInfo;
+	mapping(address => StakingRewardsInfo) public stakingRewardsTokenInfo;
 
 	function initialize(address _rewardsToken, uint256 _stakingRewardsGenesis)
 		public
@@ -63,14 +65,13 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		address uniswap,
 		address weth
 	) public onlyRole(DEFAULT_ADMIN_ROLE) {
-		StakingRewardsInfo storage info = stakingRewardsTokenInfo[poolsAmounts];
+		StakingRewardsInfo storage info = stakingRewardsTokenInfo[stakingToken];
 
 		require(
 			info.stakingRewards == address(0),
 			"StakingManager::deploy: staking token already deployed"
 		);
 		StakingRewards newContract = new StakingRewards(
-			/*_rewardsDistribution=*/
 			address(this),
 			rewardsToken,
 			stakingToken,
@@ -81,7 +82,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		info.stakingRewards = payable(address(newContract));
 		info.rewardAmount = rewardAmount;
 		info.duration = rewardsDuration;
-		poolsAmounts++;
+    stakingTokens.push(stakingToken);
 	}
 
 	/// @param _rewardAmount total staking amount
@@ -89,11 +90,11 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	/// @notice update staking info
 
 	function update(
-		uint256 _stakeId,
+		address _stakeToken,
 		uint256 _rewardAmount,
 		uint256 _rewardsDuration
 	) public onlyRole(DEFAULT_ADMIN_ROLE) {
-		StakingRewardsInfo storage info = stakingRewardsTokenInfo[_stakeId];
+		StakingRewardsInfo storage info = stakingRewardsTokenInfo[_stakeToken];
 		require(
 			info.stakingRewards != address(0),
 			"StakingManager::update: not deployed"
@@ -107,13 +108,13 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 
 	/// @notice notify reward amount for an individual staking token.
 
-	function notifyRewardAmount(uint256 _stakeId) public {
+	function notifyRewardAmount(address _stakeToken) public {
 		require(
 			block.timestamp >= stakingRewardsGenesis,
 			"StakingManager::notifyRewardAmount: not ready"
 		);
 
-		StakingRewardsInfo storage info = stakingRewardsTokenInfo[_stakeId];
+		StakingRewardsInfo storage info = stakingRewardsTokenInfo[_stakeToken];
 		require(
 			info.stakingRewards != address(0),
 			"StakingManager::notifyRewardAmount: not deployed"
@@ -136,27 +137,24 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		}
 	}
 
-	function pullExtraTokens(address token, uint256 amount)
-		external
-		onlyRole(DEFAULT_ADMIN_ROLE)
-	{
-		IERC20(token).transfer(msg.sender, amount);
+	function getStakingToken(address stakingToken) public view returns(StakingRewardsInfo memory) {
+		return stakingRewardsTokenInfo[stakingToken];
 	}
 
-	function stake(uint256 _amount, uint256 _stakeId) external {
-		StakingRewards(stakingRewardsTokenInfo[_stakeId].stakingRewards).stake(
+	function stake(uint256 _amount, address _stakeToken) external {
+		StakingRewards(stakingRewardsTokenInfo[_stakeToken].stakingRewards).stake(
 			_amount
 		);
 	}
 
 	function stakeWithPermit(
 		uint256 _amount,
-		uint256 _stakeId,
+		address _stakeToken,
 		uint8 _v,
 		bytes32 _r,
 		bytes32 _s
 	) external {
-		StakingRewards(stakingRewardsTokenInfo[_stakeId].stakingRewards)
+		StakingRewards(stakingRewardsTokenInfo[_stakeToken].stakingRewards)
 			.stakeWithPermit(_amount, DEADLINE, _v, _r, _s);
 	}
   
