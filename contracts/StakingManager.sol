@@ -63,7 +63,8 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		uint256 rewardAmount,
 		uint256 rewardsDuration,
 		address uniswap,
-		address weth
+		address weth,
+    address _uniswapFactory
 	) public onlyRole(DEFAULT_ADMIN_ROLE) {
 		StakingRewardsInfo storage info = stakingRewardsTokenInfo[stakingToken];
 
@@ -76,13 +77,15 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 			rewardsToken,
 			stakingToken,
 			uniswap,
-			weth
+			weth,
+      _uniswapFactory
 		);
 
 		info.stakingRewards = payable(address(newContract));
 		info.rewardAmount = rewardAmount;
 		info.duration = rewardsDuration;
     stakingTokens.push(stakingToken);
+    poolsAmounts++;
 	}
 
 	/// @param _rewardAmount total staking amount

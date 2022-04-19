@@ -59,7 +59,7 @@ describe("stake", () => {
 
 			const tx = await liquidityManager
 				.connect(userSigner)
-				.addLiquidityEth(DAI_TOKEN.address, liquidityAmount, minToken, minEth, {
+				.addLiquidityEth(DAI_TOKEN.address, {
 					value: liquidityAmount,
 				});
 			await printGas(tx);
@@ -174,15 +174,9 @@ describe("stake", () => {
 					amount: liquidityAmount,
 				});
 
-				let tx = await liquidityManager.addLiquidityEth(
-					DAI_TOKEN.address,
-					liquidityAmount,
-					minToken,
-					minEth,
-					{
-						value: liquidityAmount,
-					}
-				);
+				let tx = await liquidityManager.addLiquidityEth(DAI_TOKEN.address, {
+					value: liquidityAmount,
+				});
 				await printGas(tx);
 				await allowance({
 					tokenAddress: UDAI_TOKEN.address,
@@ -253,13 +247,7 @@ describe("stake", () => {
 
 			tx = await stakingRewards
 				.connect(userSigner)
-				.addLiquidityAndStake(
-					DAI_TOKEN.address,
-					liquidityAmount,
-					minToken,
-					minEth,
-					{ value: ethAmount }
-				);
+				.addLiquidityAndStake(DAI_TOKEN.address, { value: ethAmount });
 			const postStakingBalance = await balanceOf({
 				tokenAddress: UDAI_TOKEN.address,
 				from: user,
@@ -292,7 +280,7 @@ describe("stake", () => {
 
 			const tx = await liquidityManager
 				.connect(userSigner)
-				.addLiquidityEth(DAI_TOKEN.address, liquidityAmount, minToken, minEth, {
+				.addLiquidityEth(DAI_TOKEN.address, {
 					value: liquidityAmount,
 				});
 			await printGas(tx);

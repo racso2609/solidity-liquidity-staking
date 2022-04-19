@@ -3,6 +3,7 @@ const { getToken, getContract } = require("../utils/tokens");
 const UDAI_TOKEN = getToken("UDAI");
 const UNISWAP = getContract("UNISWAP");
 const WETH_TOKEN = getToken("WETH");
+const UNISWAP_FACTORY = getContract("UNISWAP_FACTORY");
 
 // modify when needed
 module.exports = async ({ getNamedAccounts, deployments }) => {
@@ -21,6 +22,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 			UDAI_TOKEN.address,
 			UNISWAP.address,
 			WETH_TOKEN.address,
+			UNISWAP_FACTORY.address,
 		],
 	});
 };

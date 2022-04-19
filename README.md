@@ -16,6 +16,9 @@ our stake contract use RT tokens to pay reward to the user, using uniSwapV2 we p
   - Addresses
 
 
-"RewardToken" deployed at 0x106557BCC26187b4C7209295b9Ec1a7d0C3dA096 with 1788033 gas
-"StakingRewards" deployed at 0xB7B4eD8C51Ce165eE632B7f846B4518B18FDFeFC with 1487795 gas
-"StakingManager" deployed at 0xB7B4eD8C51Ce165eE632B7f846B4518B18FDFeFC with 1487795 gas
+deploying "RewardToken" (tx: 0xb8099055e3fdbe6bc6483a92acc5f66cfce611c57250a204034a59ae1c87b69b)...: deployed at 0x9Abd96cB9Ee22D7608812AC279020E6e885786fd with 1835247 gas
+
+deploying "StakingManager_Implementation" (tx: 0xf1c1b07e920836ff7246389969bd2f7947cd42b3e672028f8426f66b71e7c2f0)...: deployed at 0x889829764ba70B8d719eacb4f63142071a2A2e14 with 2593142 gas
+
+deploying "StakingManager_Proxy" (tx: 0x60355177567fba24ac5787543410ab5deaacb8a72c7433a6a7a7bd613b662006)...: deployed at 0xd8878def8F3d06a7b4bEF93bBb427DEb856a6368 with 709852 gas
+Done in 56.96s.one in 60.40s.

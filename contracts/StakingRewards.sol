@@ -64,8 +64,9 @@ contract StakingRewards is
 		address _rewardsToken,
 		address _stakingToken,
 		address _uniswap,
-		address _weth
-	) LiquidityManager(_uniswap, _weth) {
+		address _weth,
+		address _uniswapFactory
+	) LiquidityManager(_uniswap, _weth, _uniswapFactory) {
 		rewardsToken = IERC20(_rewardsToken);
 		stakingToken = IERC20(_stakingToken);
 		rewardsDistribution = _rewardsDistribution;
@@ -178,17 +179,13 @@ contract StakingRewards is
 	}
 
 	function addLiquidityAndStake(
-		address _tokenB,
-		uint256 _amountTokenB,
-		uint256 _amountTokenMin,
-		uint256 _amountEthMin
-	
+		address _tokenB
 	) external payable {
 		(
 			uint256 amountToken,
 			uint256 amountEth,
 			uint256 liquidity
-		) = addLiquidityEth(_tokenB, _amountTokenB, _amountTokenMin, _amountEthMin);
+		) = addLiquidityEth(_tokenB);
 		stake(liquidity);
 	}
 

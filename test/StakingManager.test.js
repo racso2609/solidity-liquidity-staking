@@ -22,6 +22,7 @@ describe("Staking manager", () => {
 		UDAI_TOKEN = getToken("UDAI");
 		DAI_TOKEN = getToken("DAI");
 		UNISWAP = getContract("UNISWAP");
+		UNISWAP_FACTORY = getContract("UNISWAP_FACTORY");
 		WETH_TOKEN = getToken("WETH");
 
 		stakingToken = null;
@@ -44,7 +45,8 @@ describe("Staking manager", () => {
 				rewardAmount.toString(),
 				rewardDuration,
 				UNISWAP.address,
-				WETH_TOKEN.address
+				WETH_TOKEN.address,
+				UNISWAP_FACTORY.address
 			);
 			await printGas(tx);
 
@@ -62,7 +64,9 @@ describe("Staking manager", () => {
 				rewardAmount.toString(),
 				rewardDuration,
 				UNISWAP.address,
-				WETH_TOKEN.address
+				WETH_TOKEN.address,
+
+				UNISWAP_FACTORY.address
 			);
 			await expect(
 				stakingManager.deploy(
@@ -70,7 +74,9 @@ describe("Staking manager", () => {
 					rewardAmount.toString(),
 					rewardDuration,
 					UNISWAP.address,
-					WETH_TOKEN.address
+					WETH_TOKEN.address,
+
+					UNISWAP_FACTORY.address
 				)
 			).to.be.revertedWith(
 				"StakingManager::deploy: staking token already deployed"
@@ -86,7 +92,8 @@ describe("Staking manager", () => {
 				rewardAmount.toString(),
 				rewardDuration,
 				UNISWAP.address,
-				WETH_TOKEN.address
+				WETH_TOKEN.address,
+				UNISWAP_FACTORY.address
 			);
 			await printGas(tx);
 			stakingToken = await stakingManager.getStakingToken(UDAI_TOKEN.address);
@@ -146,7 +153,8 @@ describe("Staking manager", () => {
 				rewardAmount.toString(),
 				rewardDuration,
 				UNISWAP.address,
-				WETH_TOKEN.address
+				WETH_TOKEN.address,
+				UNISWAP_FACTORY.address
 			);
 			await increaseTime(7776001);
 			const rewardToken = await hre.ethers.getContractAt(
@@ -171,4 +179,3 @@ describe("Staking manager", () => {
 		});
 	});
 });
-
