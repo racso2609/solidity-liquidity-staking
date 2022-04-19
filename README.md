@@ -1,4 +1,21 @@
 - SLP staking liquidity
 
+our stake contract use RT tokens to pay reward to the user, using uniSwapV2 we provide liquidity to any ETH/Token pool, and using this lp Token we can use or stake contract, we create a stakeManage that allow use create differente stakes contracts using anu ETH/Token pool
+
+  - ENV
+   
+    * SIGNER_PV_KEY : run npx hardhat node and add here the private key of the signer with index 2
+    * URL: url of the net to test, we recommend use https://eth-mainnet.alchemyapi.io/v2
+    * NETWORK_ID: netId from test network
+    * MNEMONIC: mnemonic using for hardhat 
+    * ALCHEMY_KEY: alchemy api key
+    * ETHERSCAN: api key
+    * REPORT_GAS: report gas flag
+
+
+  - Addresses
+
+
 "RewardToken" deployed at 0x106557BCC26187b4C7209295b9Ec1a7d0C3dA096 with 1788033 gas
 "StakingRewards" deployed at 0xB7B4eD8C51Ce165eE632B7f846B4518B18FDFeFC with 1487795 gas
+"StakingManager" deployed at 0xB7B4eD8C51Ce165eE632B7f846B4518B18FDFeFC with 1487795 gas
