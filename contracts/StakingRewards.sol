@@ -44,8 +44,9 @@ contract StakingRewards is
 
 	IERC20 public rewardsToken;
 	IERC20 public stakingToken;
-	uint256 public periodFinish = 0;
+	uint256 public periodFinish;
 	uint256 public lastUpdateTime;
+
 	// check this
 	uint256 public rewardRate;
 	uint256 public rewardPerTokenStored;
@@ -94,9 +95,6 @@ contract StakingRewards is
 	}
 
 	function rewardPerToken() public view override returns (uint256) {
-		console.log("------ rewardPerToken ------");
-		console.log(_totalSupply, rewardPerTokenStored, lastUpdateTime, rewardRate);
-		console.log("------ rewardPerToken ------");
 		if (_totalSupply == 0) {
 			return rewardPerTokenStored;
 		}
@@ -113,14 +111,6 @@ contract StakingRewards is
 	/// @param _account user earned
 	/// @notice return earned amount
 	function earned(address _account) public view override returns (uint256) {
-		console.log("------ earned ------");
-		console.log(
-			_balances[_account],
-			userRewardPerTokenPaid[_account],
-			rewards[_account]
-		);
-
-		console.log("------ earned ------");
 		return
 			_balances[_account]
 				.mul(rewardPerToken().sub(userRewardPerTokenPaid[_account]))
@@ -159,6 +149,8 @@ contract StakingRewards is
 			_s
 		);
 
+
+    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
 		emit Staked(msg.sender, _amount);
 	}
 
@@ -178,14 +170,8 @@ contract StakingRewards is
 		emit Staked(msg.sender, _amount);
 	}
 
-	function addLiquidityAndStake(
-		address _tokenB
-	) external payable {
-		(
-			uint256 amountToken,
-			uint256 amountEth,
-			uint256 liquidity
-		) = addLiquidityEth(_tokenB);
+	function addLiquidityAndStake(address _tokenB) external payable {
+		(, , uint256 liquidity) = addLiquidityEth(_tokenB);
 		stake(liquidity);
 	}
 
@@ -207,7 +193,6 @@ contract StakingRewards is
 	/// @notice claim token reward
 	function claimTokens() public nonReentrant updateReward(msg.sender) {
 		uint256 reward = rewards[msg.sender];
-		console.log(reward);
 		if (reward > 0) {
 			rewards[msg.sender] = 0;
 			rewardsToken.safeTransfer(msg.sender, reward);
@@ -252,11 +237,14 @@ contract StakingRewards is
 	}
 
 	/* ========== MODIFIERS ========== */
+
 	/// @param _account user to modify earned
-	/// @notice mdify earns values
+	/// @notice modify earns values
+
 	modifier updateReward(address _account) {
 		rewardPerTokenStored = rewardPerToken();
 		lastUpdateTime = lastTimeRewardApplicable();
+
 		if (_account != address(0)) {
 			rewards[_account] = earned(_account);
 			userRewardPerTokenPaid[_account] = rewardPerTokenStored;

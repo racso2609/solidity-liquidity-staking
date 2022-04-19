@@ -7,6 +7,7 @@ const {
 	allowance,
 	balanceOf,
 	getContract,
+	transfer,
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
@@ -159,6 +160,7 @@ describe("stake", () => {
 					.withArgs(user, stakingAmount);
 			});
 		});
+
 		describe("claim tokens", () => {
 			beforeEach(async () => {
 				await impersonateTokens({
@@ -184,21 +186,33 @@ describe("stake", () => {
 					from: user,
 					to: stakingRewards.address,
 				});
+				rewardAmount = 100000;
+				rewardAmountDuration = 60 * 60 * 24 * 4 * 30 * 7;
+				await transfer({
+					tokenAddress: rewardToken.address,
+					to: stakingRewards.address,
+					from: deployer,
+					amount: rewardAmount,
+				});
 
-				// tx = await stakingRewards.stake(stakingAmount);
-				// await printGas(tx);
+				tx = await stakingRewards.notifyRewardAmount(
+					rewardAmount,
+					rewardAmountDuration
+				);
 
-				tx = await stakingRewards.connect(userSigner).stake(stakingAmount);
+				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
 				await printGas(tx);
-				// tx = await stakingRewards.notifyRewardAmount(1, 10);
-				// await printGas(tx);
+
+				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
+				await printGas(tx);
 			});
 			it("claim token", async () => {
 				const preRewardBalance = await balanceOf({
 					tokenAddress: rewardToken.address,
 					from: user,
 				});
-				const tx = await stakingRewards.connect(userSigner).claimTokens();
+
+				tx = await stakingRewards.connect(userSigner).claimTokens();
 				await printGas(tx);
 
 				const postRewardBalance = await balanceOf({
@@ -207,6 +221,33 @@ describe("stake", () => {
 				});
 				expect(postRewardBalance).to.be.gt(preRewardBalance);
 			});
+			it("reward amount", async () => {
+				const tx = await stakingRewards.notifyRewardAmount(
+					rewardAmount,
+					rewardAmountDuration
+				);
+				await printGas(tx);
+
+				expect(stakingRewards.rewardRate).to.be.not.equal(0);
+			});
+			it("reward amount event", async () => {
+				await expect(
+					stakingRewards.notifyRewardAmount(rewardAmount, rewardAmountDuration)
+				).to.emit(stakingRewards, "RewardAdded");
+			});
+
+			// it("claim tokens event", async () => {
+			//	let tx = await stakingRewards.notifyRewardAmount(
+			//		rewardAmount,
+			//		rewardAmountDuration
+			//	);
+			//	await printGas(tx);
+
+			//	await expect(stakingRewards.connect(userSigner).claimTokens()).to.emit(
+			//		stakingRewards,
+			//		"RewardPaid"
+			//	);
+			// });
 		});
 	});
 	describe("add liquidity and stake", () => {

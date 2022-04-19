@@ -1,12 +1,16 @@
 const { expect } = require("chai");
 const { fixture } = deployments;
-const { getContract, getToken, transfer } = require("../utils/tokens");
+const {
+	getContract,
+	getToken,
+	transfer,
+	balanceOf,
+} = require("../utils/tokens");
 const {
 	printGas,
-	currentTime,
 	increaseTime,
+	currentTime,
 } = require("../utils/transactions");
-const { IERC20 } = require("../utils/tokens");
 
 describe("Staking manager", () => {
 	beforeEach(async () => {
@@ -27,19 +31,21 @@ describe("Staking manager", () => {
 
 		stakingToken = null;
 		rewardAmount = 100 * 10 ** 18;
-		rewardDuration = (await currentTime()) + 7776000;
+		rewardDuration = 60 * 60 * 24 * 7 * 4 * 3; // 3 months
+	});
+	describe("basic info", () => {
+		it("have correct reward token", async () => {
+			expect(await stakingManager.rewardsToken()).to.be.eq(rewardToken.address);
+		});
+
+		it("deployer is admin", async () => {
+			const adminRole = await stakingManager.DEFAULT_ADMIN_ROLE();
+			expect(await stakingManager.hasRole(adminRole, deployer));
+		});
 	});
 
 	describe("deploy", () => {
 		it("deploy a staking token in the contract", async () => {
-			let stakingToken = await stakingManager.getStakingToken(
-				UDAI_TOKEN.address
-			);
-			expect(stakingToken[0]).to.be.equal(
-				"0x0000000000000000000000000000000000000000"
-			);
-			expect(stakingToken[1]).to.be.equal(0);
-			expect(stakingToken[2]).to.be.equal(0);
 			const tx = await stakingManager.deploy(
 				UDAI_TOKEN.address,
 				rewardAmount.toString(),
@@ -51,9 +57,7 @@ describe("Staking manager", () => {
 			await printGas(tx);
 
 			stakingToken = await stakingManager.getStakingToken(UDAI_TOKEN.address);
-			expect(stakingToken.stakingRewards).to.be.not.equal(
-				"0x0000000000000000000000000000000000000000"
-			);
+			expect(stakingToken.stakingRewards).to.be.not.equal("0x0");
 			expect(stakingToken.rewardAmount).to.be.equal(rewardAmount.toString());
 			expect(stakingToken.duration).to.be.equal(rewardDuration);
 		});
@@ -75,7 +79,6 @@ describe("Staking manager", () => {
 					rewardDuration,
 					UNISWAP.address,
 					WETH_TOKEN.address,
-
 					UNISWAP_FACTORY.address
 				)
 			).to.be.revertedWith(
@@ -95,28 +98,26 @@ describe("Staking manager", () => {
 				WETH_TOKEN.address,
 				UNISWAP_FACTORY.address
 			);
+
 			await printGas(tx);
 			stakingToken = await stakingManager.getStakingToken(UDAI_TOKEN.address);
-			expect(stakingToken[0]).to.be.not.equal(
-				"0x0000000000000000000000000000000000000000"
-			);
-			expect(stakingToken[1]).to.be.equal(rewardAmount.toString());
-			expect(stakingToken[2]).to.be.equal(rewardDuration);
+			expect(stakingToken.stakingRewards).to.be.not.equal("0x0");
+			expect(stakingToken.rewardAmount).to.be.equal(rewardAmount.toString());
+			expect(stakingToken.duration).to.be.equal(rewardDuration);
 
 			// updating the staking token
 			rewardAmount += 10 * 10 ** 18; // 10 tokens
 			rewardDuration += 86400; // 1 day
+
 			tx = await stakingManager.update(
 				UDAI_TOKEN.address,
 				rewardAmount.toString(),
 				rewardDuration
 			);
 			stakingToken = await stakingManager.getStakingToken(UDAI_TOKEN.address);
-			expect(stakingToken[0]).to.be.not.equal(
-				"0x0000000000000000000000000000000000000000"
-			);
-			expect(stakingToken[1]).to.be.equal(rewardAmount.toString());
-			expect(stakingToken[2]).to.be.equal(rewardDuration);
+			expect(stakingToken.stakingRewards).to.be.not.equal("0x0");
+			expect(stakingToken.rewardAmount).to.be.equal(rewardAmount.toString());
+			expect(stakingToken.duration).to.be.equal(rewardDuration);
 		});
 
 		it("should fail if staking token is not deployed yet", async () => {
@@ -141,7 +142,7 @@ describe("Staking manager", () => {
 		});
 
 		it("should fail if the staking token is not deployed", async () => {
-			await increaseTime(7776001);
+			await increaseTime(rewardDuration + 1);
 			await expect(
 				stakingManager.notifyRewardAmount(UDAI_TOKEN.address)
 			).to.be.revertedWith("StakingManager::notifyRewardAmount: not deployed");
@@ -156,21 +157,23 @@ describe("Staking manager", () => {
 				WETH_TOKEN.address,
 				UNISWAP_FACTORY.address
 			);
-			await increaseTime(7776001);
-			const rewardToken = await hre.ethers.getContractAt(
-				IERC20,
-				await stakingManager.rewardsToken()
-			);
-			const amount = (await rewardToken.balanceOf(deployer)).toString();
+			await increaseTime(rewardDuration);
+			const amount = await balanceOf({
+				tokenAddress: await stakingManager.rewardsToken(),
+				from: deployer,
+			});
+
 			await transfer({
 				tokenAddress: rewardToken.address,
 				amount: amount,
 				from: deployer,
 				to: stakingManager.address,
 			});
+
 			expect(
 				await stakingManager.notifyRewardAmount(UDAI_TOKEN.address)
 			).to.emit(stakingRewards, "RewardAdded");
+
 			const stakingToken = await stakingManager.getStakingToken(
 				UDAI_TOKEN.address
 			);

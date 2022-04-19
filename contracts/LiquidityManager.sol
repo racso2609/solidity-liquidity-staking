@@ -154,7 +154,6 @@ contract LiquidityManager {
 			block.timestamp + DEADLINE
 		);
 
-console.log("liquide");
 		emit AddLiquidity(weth, _tokenB, liquidity, amountEth, amountToken);
 		return (amountToken, amountEth, liquidity);
 	}

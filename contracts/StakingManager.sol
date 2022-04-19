@@ -14,6 +14,7 @@ import "./StakingRewards.sol";
 import "./interfaces/IUniswap.sol";
 
 contract StakingManager is Initializable, AccessControlUpgradeable {
+  using SafeMath for uint256;
 	// immutables
 	address public rewardsToken;
 	uint256 public stakingRewardsGenesis;
@@ -31,20 +32,15 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 
 	mapping(address => StakingRewardsInfo) public stakingRewardsTokenInfo;
 
-	function initialize(address _rewardsToken, uint256 _stakingRewardsGenesis)
-		public
+	function initialize (address _rewardsToken, uint256 _stakingRewardsGenesis)
+		external
 		initializer
 	{
-		require(
-			_stakingRewardsGenesis >= block.timestamp,
-			"StakingManager::constructor: genesis too soon"
-		);
 
 		rewardsToken = _rewardsToken;
-		stakingRewardsGenesis = _stakingRewardsGenesis;
+		stakingRewardsGenesis = block.timestamp.add(_stakingRewardsGenesis);
     __AccessControl_init();
 		_grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
 	}
 
 	function setAdmin(address _newAdmin) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -72,7 +68,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 			info.stakingRewards == address(0),
 			"StakingManager::deploy: staking token already deployed"
 		);
-		StakingRewards newContract = new StakingRewards(
+      StakingRewards newContract = new StakingRewards(
 			address(this),
 			rewardsToken,
 			stakingToken,
@@ -112,6 +108,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	/// @notice notify reward amount for an individual staking token.
 
 	function notifyRewardAmount(address _stakeToken) public {
+
 		require(
 			block.timestamp >= stakingRewardsGenesis,
 			"StakingManager::notifyRewardAmount: not ready"
@@ -142,23 +139,6 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 
 	function getStakingToken(address stakingToken) public view returns(StakingRewardsInfo memory) {
 		return stakingRewardsTokenInfo[stakingToken];
-	}
-
-	function stake(uint256 _amount, address _stakeToken) external {
-		StakingRewards(stakingRewardsTokenInfo[_stakeToken].stakingRewards).stake(
-			_amount
-		);
-	}
-
-	function stakeWithPermit(
-		uint256 _amount,
-		address _stakeToken,
-		uint8 _v,
-		bytes32 _r,
-		bytes32 _s
-	) external {
-		StakingRewards(stakingRewardsTokenInfo[_stakeToken].stakingRewards)
-			.stakeWithPermit(_amount, DEADLINE, _v, _r, _s);
 	}
   
 }
