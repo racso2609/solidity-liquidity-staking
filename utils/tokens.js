@@ -198,4 +198,5 @@ module.exports = {
 	contracts,
 	getContract,
 	transfer,
+	IERC20: ERC20ABI.abi,
 };
