@@ -98,6 +98,8 @@ contract StakingRewards is
 		if (_totalSupply == 0) {
 			return rewardPerTokenStored;
 		}
+
+     
 		return
 			rewardPerTokenStored.add(
 				lastTimeRewardApplicable()
@@ -111,6 +113,8 @@ contract StakingRewards is
 	/// @param _account user earned
 	/// @notice return earned amount
 	function earned(address _account) public view override returns (uint256) {
+    console.log("earned",rewardPerToken(),userRewardPerTokenPaid[_account]);
+
 		return
 			_balances[_account]
 				.mul(rewardPerToken().sub(userRewardPerTokenPaid[_account]))
@@ -193,6 +197,8 @@ contract StakingRewards is
 	/// @notice claim token reward
 	function claimTokens() public nonReentrant updateReward(msg.sender) {
 		uint256 reward = rewards[msg.sender];
+    console.log(reward);
+
 		if (reward > 0) {
 			rewards[msg.sender] = 0;
 			rewardsToken.safeTransfer(msg.sender, reward);

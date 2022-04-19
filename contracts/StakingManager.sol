@@ -108,7 +108,6 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	/// @notice notify reward amount for an individual staking token.
 
 	function notifyRewardAmount(address _stakeToken) public {
-
 		require(
 			block.timestamp >= stakingRewardsGenesis,
 			"StakingManager::notifyRewardAmount: not ready"

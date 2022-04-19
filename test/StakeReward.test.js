@@ -176,9 +176,29 @@ describe("stake", () => {
 					amount: liquidityAmount,
 				});
 
+				await impersonateTokens({
+					to: user,
+					from: getImpersonate("DAI").address, //dai impersonate
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+				await allowance({
+					to: liquidityManager.address,
+					from: user,
+					tokenAddress: DAI_TOKEN.address,
+					amount: liquidityAmount,
+				});
+
 				let tx = await liquidityManager.addLiquidityEth(DAI_TOKEN.address, {
 					value: liquidityAmount,
 				});
+
+				tx = await liquidityManager
+					.connect(userSigner)
+					.addLiquidityEth(DAI_TOKEN.address, {
+						value: liquidityAmount,
+					});
+
 				await printGas(tx);
 				await allowance({
 					tokenAddress: UDAI_TOKEN.address,
@@ -186,6 +206,14 @@ describe("stake", () => {
 					from: user,
 					to: stakingRewards.address,
 				});
+
+				await allowance({
+					tokenAddress: UDAI_TOKEN.address,
+					amount: stakingAmount,
+					from: deployer,
+					to: stakingRewards.address,
+				});
+
 				rewardAmount = 100000;
 				rewardAmountDuration = 60 * 60 * 24 * 4 * 30 * 7;
 				await transfer({
@@ -203,9 +231,10 @@ describe("stake", () => {
 				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
 				await printGas(tx);
 
-				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
+				tx = await stakingRewards.stake(stakingAmount / 2);
 				await printGas(tx);
 			});
+
 			it("claim token", async () => {
 				const preRewardBalance = await balanceOf({
 					tokenAddress: rewardToken.address,
