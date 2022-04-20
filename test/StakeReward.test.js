@@ -11,7 +11,7 @@ const {
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas } = require("../utils/transactions");
+const { printGas, increaseBlocks, increaseTime } = require("../utils/transactions");
 const { signERC2612Permit } = require("eth-permit");
 
 describe("stake", () => {
@@ -72,6 +72,7 @@ describe("stake", () => {
 				to: stakingRewards.address,
 			});
 		});
+		
 		describe("normal stake", () => {
 			it("normal stake fail amount 0", async () => {
 				await expect(
@@ -160,9 +161,19 @@ describe("stake", () => {
 					.withArgs(user, stakingAmount);
 			});
 		});
-
+		
 		describe("claim tokens", () => {
 			beforeEach(async () => {
+				var amount = (await rewardToken.balanceOf(deployer)).toString();
+				//console.log(amount);
+				await transfer({
+					tokenAddress: rewardToken.address,
+					amount: amount,
+					from: deployer,
+					to: stakingRewards.address,
+				});
+				amount = (await rewardToken.balanceOf(deployer)).toString();
+				//console.log(amount);
 				await impersonateTokens({
 					to: deployer,
 					from: getImpersonate("DAI").address, //dai impersonate
@@ -216,26 +227,22 @@ describe("stake", () => {
 
 				rewardAmount = 100000;
 				rewardAmountDuration = 60 * 60 * 24 * 4 * 30 * 7;
-				await transfer({
-					tokenAddress: rewardToken.address,
-					to: stakingRewards.address,
-					from: deployer,
-					amount: rewardAmount,
-				});
-
-				tx = await stakingRewards.notifyRewardAmount(
-					rewardAmount,
-					rewardAmountDuration
-				);
-
+			
 				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
 				await printGas(tx);
 
 				tx = await stakingRewards.stake(stakingAmount / 2);
 				await printGas(tx);
+
+
+				tx = await stakingRewards.notifyRewardAmount(10000000000000, 10000000);
+				await printGas(tx);
 			});
 
 			it("claim token", async () => {
+				await increaseTime(60*60*24*3);
+				const userBalance = (await stakingRewards.balanceOf(user)).toString();
+				//console.log("user Balance: " + userBalance);
 				const preRewardBalance = await balanceOf({
 					tokenAddress: rewardToken.address,
 					from: user,
@@ -248,6 +255,7 @@ describe("stake", () => {
 					tokenAddress: rewardToken.address,
 					from: user,
 				});
+				//console.log("Post Reward Balance: " + postRewardBalance);
 				expect(postRewardBalance).to.be.gt(preRewardBalance);
 			});
 			it("reward amount", async () => {
@@ -279,6 +287,7 @@ describe("stake", () => {
 			// });
 		});
 	});
+	
 	describe("add liquidity and stake", () => {
 		beforeEach(async () => {
 			liquidityAmount = parseEther("10");
@@ -392,4 +401,5 @@ describe("stake", () => {
 			expect(stakingBalance).to.be.gt(0);
 		});
 	});
+	
 });
