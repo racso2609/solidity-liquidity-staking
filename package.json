@@ -1,11 +1,10 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "prettier": "prettier --write 'contracts/**/*.sol'",
-    "lint": "prettier --list-different 'contracts/**/*.sol'",
     "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
     "compile": "hardhat compile",
-    "deploy-test": "hardhat deploy --network rinkeby"
+    "deploy:test": "hardhat deploy --tags manager --network rinkeby"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
