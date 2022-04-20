@@ -52,3 +52,6 @@ Our stake contract use RT tokens to pay reward to the user, using uniSwapV2 we p
     * StakingManager_Implementation: Deployed at 0xC177a6b341dA805C2F6f49F6BFD9F90FDc1FE054 
 
     * StakingManager_Proxy: Deployed at 0x9FE560dA540a941BaFF6c7E4e5385FdAaaf426D9
+  
+  - Front 
+    * https://github.com/alvardof/solidity-liquidity-staking-front/
