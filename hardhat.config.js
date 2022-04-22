@@ -24,10 +24,10 @@ module.exports = {
 		hardhat: {
 			// Uncomment these lines to use mainnet fork
 			forking: {
-				url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-				blockNumber: 14585261,
-				// url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
-				// blockNumber: 10527216,
+				// url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+				// blockNumber: 14585261,
+				url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+				blockNumber: 10527216,
 			},
 		},
 		rinkeby: {

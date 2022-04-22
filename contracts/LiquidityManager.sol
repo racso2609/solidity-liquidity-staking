@@ -111,7 +111,7 @@ contract LiquidityManager {
 
 
 		uniswap.swapExactETHForTokens{ value: _amount }(
-			minAmount,
+			1,
 			path,
 			address(this),
 			block.timestamp
