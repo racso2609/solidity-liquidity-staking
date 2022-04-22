@@ -11,7 +11,11 @@ const {
 } = require("../utils/tokens");
 const { utils } = ethers;
 const { parseEther } = utils;
-const { printGas, increaseBlocks, increaseTime } = require("../utils/transactions");
+const {
+	printGas,
+	increaseBlocks,
+	increaseTime,
+} = require("../utils/transactions");
 const { signERC2612Permit } = require("eth-permit");
 
 describe("stake", () => {
@@ -72,7 +76,7 @@ describe("stake", () => {
 				to: stakingRewards.address,
 			});
 		});
-		
+
 		describe("normal stake", () => {
 			it("normal stake fail amount 0", async () => {
 				await expect(
@@ -161,7 +165,7 @@ describe("stake", () => {
 					.withArgs(user, stakingAmount);
 			});
 		});
-		
+
 		describe("claim tokens", () => {
 			beforeEach(async () => {
 				var amount = (await rewardToken.balanceOf(deployer)).toString();
@@ -227,20 +231,19 @@ describe("stake", () => {
 
 				rewardAmount = 100000;
 				rewardAmountDuration = 60 * 60 * 24 * 4 * 30 * 7;
-			
+
 				tx = await stakingRewards.connect(userSigner).stake(stakingAmount / 2);
 				await printGas(tx);
 
 				tx = await stakingRewards.stake(stakingAmount / 2);
 				await printGas(tx);
 
-
 				tx = await stakingRewards.notifyRewardAmount(10000000000000, 10000000);
 				await printGas(tx);
 			});
 
 			it("claim token", async () => {
-				await increaseTime(60*60*24*3);
+				await increaseTime(60 * 60 * 24 * 3);
 				const userBalance = (await stakingRewards.balanceOf(user)).toString();
 				//console.log("user Balance: " + userBalance);
 				const preRewardBalance = await balanceOf({
@@ -287,27 +290,11 @@ describe("stake", () => {
 			// });
 		});
 	});
-	
+
 	describe("add liquidity and stake", () => {
 		beforeEach(async () => {
-			liquidityAmount = parseEther("10");
-			minToken = 1;
-			minEth = 1;
+			liquidityAmount = parseEther("1000");
 			ethAmount = parseEther("0.004");
-
-			await impersonateTokens({
-				to: user,
-				from: getImpersonate("DAI").address, //dai impersonate
-				tokenAddress: DAI_TOKEN.address,
-				amount: liquidityAmount,
-			});
-
-			await allowance({
-				to: stakingRewards.address,
-				from: user,
-				tokenAddress: DAI_TOKEN.address,
-				amount: liquidityAmount,
-			});
 
 			await allowance({
 				to: stakingRewards.address,
@@ -323,6 +310,7 @@ describe("stake", () => {
 			});
 
 			const preTotalSupply = await stakingRewards.totalSupply();
+			const preStakedBalance = await stakingRewards.balanceOf(user);
 
 			tx = await stakingRewards
 				.connect(userSigner)
@@ -332,9 +320,25 @@ describe("stake", () => {
 				from: user,
 			});
 			const postTotalSupply = await stakingRewards.totalSupply();
+			const postStakedBalance = await stakingRewards.balanceOf(user);
 
 			expect(postStakingBalance).to.be.eq(preStakingBalance);
 			expect(postTotalSupply).to.be.gt(preTotalSupply);
+			expect(postStakedBalance).to.be.gt(preStakedBalance);
+		});
+		it("should emit add liquidity event", async () => {
+			await expect(
+				stakingRewards.addLiquidityAndStake(DAI_TOKEN.address, {
+					value: ethAmount,
+				})
+			).to.emit(stakingRewards, "AddLiquidity");
+		});
+		it("should staked event", async () => {
+			await expect(
+				stakingRewards.addLiquidityAndStake(DAI_TOKEN.address, {
+					value: ethAmount,
+				})
+			).to.emit(stakingRewards, "Staked");
 		});
 	});
 	describe("permit", () => {
@@ -401,5 +405,4 @@ describe("stake", () => {
 			expect(stakingBalance).to.be.gt(0);
 		});
 	});
-	
 });

@@ -99,7 +99,6 @@ contract StakingRewards is
 			return rewardPerTokenStored;
 		}
 
-     
 		return
 			rewardPerTokenStored.add(
 				lastTimeRewardApplicable()
@@ -151,8 +150,7 @@ contract StakingRewards is
 			_s
 		);
 
-
-    stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+		stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
 		emit Staked(msg.sender, _amount);
 	}
 
@@ -172,9 +170,14 @@ contract StakingRewards is
 		emit Staked(msg.sender, _amount);
 	}
 
-	function addLiquidityAndStake(address _tokenB) external payable {
+	function addLiquidityAndStake(address _tokenB)
+		external
+		payable
+		returns (uint256)
+	{
 		(, , uint256 liquidity) = addLiquidityEth(_tokenB);
 		stake(liquidity);
+		return liquidity;
 	}
 
 	/// @param _amount lp tokens to unstake

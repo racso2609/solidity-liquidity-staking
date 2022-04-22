@@ -97,7 +97,7 @@ contract LiquidityManager {
 		view
 		returns (uint256)
 	{
-		return uniswap.getAmountsOut(_amount, _tokens)[1];
+		return uniswap.getAmountsIn(_amount, _tokens)[1];
 	}
 
 	function _swap(address _to, uint256 _amount) internal returns (uint){
