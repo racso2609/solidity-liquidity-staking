@@ -61,6 +61,18 @@ describe("Staking manager", () => {
 			expect(stakingToken.rewardAmount).to.be.equal(rewardAmount.toString());
 			expect(stakingToken.duration).to.be.equal(rewardDuration);
 		});
+		it("deploy a staking token in the contract should trigger and event", async () => {
+			await expect(
+				stakingManager.deploy(
+					UDAI_TOKEN.address,
+					rewardAmount.toString(),
+					rewardDuration,
+					UNISWAP.address,
+					WETH_TOKEN.address,
+					UNISWAP_FACTORY.address
+				)
+			).to.emit(stakingManager, "StakeCreation");
+		});
 
 		it("Should fail if a staking token is already deployed in the contract", async () => {
 			await stakingManager.deploy(

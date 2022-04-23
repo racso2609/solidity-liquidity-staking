@@ -22,6 +22,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	uint256 public poolsAmounts;
 
   address[] public stakingTokens;
+  event StakeCreation(address admin, address stakingReward);
 
 	// info about rewards for a particular staking token
 	struct StakingRewardsInfo {
@@ -82,6 +83,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 		info.duration = rewardsDuration;
     stakingTokens.push(stakingToken);
     poolsAmounts++;
+    emit StakeCreation(msg.sender,address(newContract));
 	}
 
 	/// @param _rewardAmount total staking amount
