@@ -4,7 +4,7 @@
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
     "compile": "hardhat compile",
-    "deploy:test": "hardhat deploy --tags manager --network rinkeby"
+    "deploy:test": "hardhat deploy --tags manager --network ropsten"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
