@@ -22,7 +22,7 @@ contract StakingManager is Initializable, AccessControlUpgradeable {
 	uint256 public poolsAmounts;
 
   address[] public stakingTokens;
-  event StakeCreation(address admin, address stakingReward);
+  event StakeCreation(address admin, address indexed stakingReward);
 
 	// info about rewards for a particular staking token
 	struct StakingRewardsInfo {
