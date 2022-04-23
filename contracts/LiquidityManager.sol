@@ -62,7 +62,7 @@ contract LiquidityManager {
 
 	function addLiquidityEth(address _tokenOut)
 		public
-    payable
+		payable
 		returns (
 			uint256,
 			uint256,
@@ -84,15 +84,22 @@ contract LiquidityManager {
 			// swap from token1 to token0
 			swapAmount = getSwapAmount(reserve1, msg.value);
 		}
-		uint amountTokenB = _swap(_tokenOut, swapAmount);
-		return _addLiquidityEth(_tokenOut, amountTokenB, 1, 1,msg.value.sub(swapAmount));
+		uint256 amountTokenB = _swap(_tokenOut, swapAmount);
+		return
+			_addLiquidityEth(
+				_tokenOut,
+				amountTokenB,
+				1,
+				1,
+				msg.value.sub(swapAmount)
+			);
 	}
 
-	/* @params _tokens the uniswap path of tokens  */
-	/* @params _amount amount of srcTokens */
-	/* @notice return a destination token amount  */
+	/** @param _tokens the uniswap path of tokens  **/
+	/** @param _amount amount of srcTokens **/
+	/** @notice return a destination token amount  **/
 
-	function _getAmountsOut(address[] memory _tokens, uint256 _amount)
+	function _getAmountsIn(address[] memory _tokens, uint256 _amount)
 		internal
 		view
 		returns (uint256)
@@ -100,24 +107,25 @@ contract LiquidityManager {
 		return uniswap.getAmountsIn(_amount, _tokens)[1];
 	}
 
-	function _swap(address _to, uint256 _amount) internal returns (uint){
+
+	function _swap(address _to, uint256 _amount) internal returns (uint256) {
 		IERC20(uniswap.WETH()).approve(address(uniswap), _amount);
 
 		address[] memory path = new address[](2);
 		path = new address[](2);
 		path[0] = uniswap.WETH();
 		path[1] = _to;
-    uint minAmount = _getAmountsOut(path, _amount);
 
+		uint256 minAmount = _getAmountsIn(path,_amount);
 
 		uniswap.swapExactETHForTokens{ value: _amount }(
-			1,
+			minAmount,
 			path,
 			address(this),
 			block.timestamp
 		);
 
-    return minAmount;
+		return minAmount;
 	}
 
 	/// @param _tokenB second token pair
@@ -131,7 +139,7 @@ contract LiquidityManager {
 		uint256 _amountTokenB,
 		uint256 _amountTokenMin,
 		uint256 _amountEthMin,
-   uint _ethAmount
+		uint256 _ethAmount
 	)
 		internal
 		returns (
@@ -140,9 +148,7 @@ contract LiquidityManager {
 			uint256
 		)
 	{
-
 		IERC20(_tokenB).safeApprove(address(uniswap), _amountTokenB);
-
 
 		(uint256 amountToken, uint256 amountEth, uint256 liquidity) = uniswap
 			.addLiquidityETH{ value: _ethAmount }(

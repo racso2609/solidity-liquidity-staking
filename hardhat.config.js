@@ -24,14 +24,25 @@ module.exports = {
 		hardhat: {
 			// Uncomment these lines to use mainnet fork
 			forking: {
+				// ---- MAIN ---
 				// url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
 				// blockNumber: 14585261,
-				url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+				// ---- RINKEBy ---
+				// url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+				// blockNumber: 10527216,
+				// ---- ROPSTEN ---
+				url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
 				blockNumber: 10527216,
 			},
 		},
 		rinkeby: {
 			url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+			accounts: {
+				mnemonic,
+			},
+		},
+		ropsten: {
+			url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
 			accounts: {
 				mnemonic,
 			},

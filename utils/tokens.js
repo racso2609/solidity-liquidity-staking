@@ -118,6 +118,28 @@ const tokens = {
 			symbol: "ULINK",
 			address: "0xa2107FA5B38d9bbd2C461D6EDf11B11A50F6b974",
 		},
+		{
+			decimals: 18,
+			symbol: "LINK",
+			address: "0x01be23585060835e02b77ef475b0cc51aa1e0709",
+		},
+	],
+	[3]: [
+		{
+			decimals: 18,
+			symbol: "DAI",
+			address: "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+		},
+		{
+			decimals: 18,
+			symbol: "UDAI",
+			address: "0x1c5DEe94a34D795f9EEeF830B68B80e44868d316",
+		},
+		{
+			decimals: 18,
+			symbol: "WETH",
+			address: "0x0a180A76e4466bF68A7F86fB029BEd3cCcFaAac5",
+		},
 	],
 };
 
@@ -137,7 +159,17 @@ const contracts = {
 			address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
 			name: "UNISWAP",
 		},
+		{
+			address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+			name: "UNISWAP_FACTORY",
+		},
+	],
 
+	[3]: [
+		{
+			address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+			name: "UNISWAP",
+		},
 		{
 			address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
 			name: "UNISWAP_FACTORY",
@@ -156,6 +188,16 @@ const impersonate = {
 		{
 			symbol: "DAI",
 			address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+		},
+		{
+			symbol: "LINK",
+			address: "0x87002564f1c7b8f51e96ca7d545e43402bf0b4ab",
+		},
+	],
+	[3]: [
+		{
+			symbol: "DAI",
+			address: "0x922b992698381c7dc8d23684e2caef396b0b73a4",
 		},
 	],
 };

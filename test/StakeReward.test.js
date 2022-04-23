@@ -326,20 +326,6 @@ describe("stake", () => {
 			expect(postTotalSupply).to.be.gt(preTotalSupply);
 			expect(postStakedBalance).to.be.gt(preStakedBalance);
 		});
-		it("should emit add liquidity event", async () => {
-			await expect(
-				stakingRewards.addLiquidityAndStake(DAI_TOKEN.address, {
-					value: ethAmount,
-				})
-			).to.emit(stakingRewards, "AddLiquidity");
-		});
-		it("should staked event", async () => {
-			await expect(
-				stakingRewards.addLiquidityAndStake(DAI_TOKEN.address, {
-					value: ethAmount,
-				})
-			).to.emit(stakingRewards, "Staked");
-		});
 	});
 	describe("permit", () => {
 		beforeEach(async () => {
@@ -347,27 +333,13 @@ describe("stake", () => {
 			minToken = 1;
 			minEth = 1;
 
-			await impersonateTokens({
-				to: user,
-				from: getImpersonate("DAI").address, //dai impersonate
-				tokenAddress: DAI_TOKEN.address,
-				amount: liquidityAmount,
-			});
-
-			await allowance({
-				to: liquidityManager.address,
-				from: user,
-				tokenAddress: DAI_TOKEN.address,
-				amount: liquidityAmount,
-			});
-
 			const tx = await liquidityManager
 				.connect(userSigner)
 				.addLiquidityEth(DAI_TOKEN.address, {
 					value: liquidityAmount,
 				});
 			await printGas(tx);
-			stakingAmount = 100;
+			stakingAmount = ethers.BigNumber.from("100");
 			result = await signERC2612Permit(
 				signer,
 				UDAI_TOKEN.address,
