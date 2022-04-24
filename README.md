@@ -47,12 +47,21 @@ Our stake contract use RT tokens to pay reward to the user, using uniSwapV2 we p
   - Addresses
 
 
-    * RewardToken: Deployed at 0xa399f67C61740f565bff49d39103EA0Bc18B1C29
+    * RewardToken: Deployed at 0x858b973dDEe347E22AD13707f5d6f91EfEbdbe88
 
-    * StakingManager_Implementation: Deployed at 0xC177a6b341dA805C2F6f49F6BFD9F90FDc1FE054 
+    * Staking Manager: Deployed at 0x653CdbbEac3998C7060bAd55C7224F35FcBEa4cA
+     
+    * StakingManager_Implementation: Deployed at 0x5bDD54010F6715A521D1f05457E4473a19D6196f 
 
-    * StakingManager_Proxy: Deployed at 0x9FE560dA540a941BaFF6c7E4e5385FdAaaf426D9
+    * StakingManager_Proxy: Deployed at 0x653CdbbEac3998C7060bAd55C7224F35FcBEa4cA
+    
+    * Graph https://thegraph.com/hosted-service/subgraph/racso2609/stake-manager 
   
   - Front 
     * https://github.com/racso2609/liquidity-stake-front
     * https://merry-duckanoo-e51ac8.netlify.app/
+
+- Comments
+  * Contact with us to make you admin be able to access all options 
+  * we deploy to ropsten because we dont found pool to dai or many others coins un rinkeby
+  * run test on ropsten
