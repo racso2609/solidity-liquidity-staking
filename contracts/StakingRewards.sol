@@ -48,7 +48,7 @@ contract StakingRewards is
 	uint256 public lastUpdateTime;
 
 	// check this
-	uint256 public rewardRate = 5;
+	uint256 public rewardRate;
 	uint256 public rewardPerTokenStored;
 	// check this
 
