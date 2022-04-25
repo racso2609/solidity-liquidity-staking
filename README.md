@@ -49,11 +49,11 @@ Our stake contract use RT tokens to pay reward to the user, using uniSwapV2 we p
 
     * RewardToken: Deployed at 0x858b973dDEe347E22AD13707f5d6f91EfEbdbe88
 
-    * Staking Manager: Deployed at 0x653CdbbEac3998C7060bAd55C7224F35FcBEa4cA
+    * Staking Manager: Deployed at 0x17A4BbfD14e98263669275eC510C2aF26eA9Ff47
      
-    * StakingManager_Implementation: Deployed at 0x5bDD54010F6715A521D1f05457E4473a19D6196f 
+    * StakingManager_Implementation: Deployed at 0x9683E7927bd70FA62e4e583bFD0bB0024C278cbb 
 
-    * StakingManager_Proxy: Deployed at 0x653CdbbEac3998C7060bAd55C7224F35FcBEa4cA
+    * StakingManager_Proxy: Deployed at 0x17A4BbfD14e98263669275eC510C2aF26eA9Ff47
     
     * Graph https://thegraph.com/hosted-service/subgraph/racso2609/stake-manager 
   
